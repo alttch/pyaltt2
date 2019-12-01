@@ -1,0 +1,7 @@
+__pycache__
+pyaltt2.egg-info
+build
+dist
+Makefile
+.idea/
+*.pyc
