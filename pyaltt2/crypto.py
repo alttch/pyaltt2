@@ -12,11 +12,14 @@ def gen_random_str(length=64):
 
 
 def _pad_key(key):
-    if len(key) < 16:
+    l = len(key)
+    if l == 16 or l == 24 or l == 32:
+        return key
+    elif l < 16:
         return key.ljust(16)
-    elif len(key) < 24:
+    elif l < 24:
         return key.ljust(24)
-    elif len(key) < 32:
+    elif l < 32:
         return key.ljust(32)
     else:
         return key[:32]
@@ -24,11 +27,17 @@ def _pad_key(key):
 
 def encrypt(raw, key, encode=True):
     """
-    Encrypt bytes with AES-256-CBC
+    Encrypt bytes with AES-CBC
+
+    For AES-128: key size <= 16 bytes
+    For AES-192: key size <= 24 bytes
+    For AES-256: key size <= 32 bytes
+
+    Keys, longer than 32 bytes, are truncated
 
     Args:
         raw: bytes to encrypt
-        key: encryption key (32 bytes max, string)
+        key: encryption key
         encode: encode result in base64 (default: True)
     """
     from Crypto.Cipher import AES
@@ -47,7 +56,7 @@ def encrypt(raw, key, encode=True):
 
 def decrypt(enc, key, decode=True):
     """
-    Decrypt encoded data with AES-256-CBC
+    Decrypt encoded data with AES-CBC
 
     Args:
         enc: data to decrypt
