@@ -165,7 +165,12 @@ def test_parse_number():
                  ('123456789,22', 123456789.22)]
 
     for d in test_data:
-        assert pyaltt2.parsers.parse_number(d[0]) == d[1]
+        s = d[0]
+        v = d[1]
+        assert pyaltt2.parsers.parse_number(s) == v
+        if isinstance(s, str): s = '-' + s
+        else: s = -1 * s
+        assert pyaltt2.parsers.parse_number(s) == -1 * v
 
 
 def test_parse_func_str():
