@@ -1,3 +1,3 @@
-# pyaltt-tools
+# pyaltt2
 
 Common functions
