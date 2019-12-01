@@ -25,8 +25,8 @@ def test_crypto_gen_random_str():
     s3 = pyaltt2.crypto.gen_random_str(length=16)
 
     assert s1 != s2
-    assert len(s1) == 64
-    assert len(s2) == 64
+    assert len(s1) == 32
+    assert len(s2) == 32
     assert len(s3) == 16
 
 
