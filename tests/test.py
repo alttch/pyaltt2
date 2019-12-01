@@ -138,6 +138,34 @@ def test_safe_int():
         assert pyaltt2.parsers.safe_int('0xFZ')
 
 
+def test_parse_date():
+    from datetime import datetime
+    d = datetime.now()
+    ts = d.timestamp()
+    test_data = [(d, d), (ts, d), (3001, datetime(1970, 1, 1, 0, 50, 1)),
+                 ('2019-11-22', datetime(2019, 11, 22))]
+    for t in test_data:
+        assert pyaltt2.parsers.parse_date(t[0], return_timestamp=False) == t[1]
+    assert pyaltt2.parsers.parse_date(2019) == 1575158400.0
+    test_data = [(d, ts), (ts, ts), (3001, 3001)]
+    for t in test_data:
+        assert pyaltt2.parsers.parse_date(t[0]) == t[1]
+
+
+test_parse_date()
+
+
+def test_parse_number():
+    test_data = [(12345, 12345), (123.45, 123.45), ('123.45', 123.45),
+                 ('123 456.78', 123456.78), ('123 456.789', 123456.789),
+                 ('123,456,789.222', 123456789.222),
+                 ('123.456.789,222', 123456789.222),
+                 ('123456789,22', 123456789.22)]
+
+    for d in test_data:
+        assert pyaltt2.parsers.parse_number(d[0]) == d[1]
+
+
 def test_parse_func_str():
     test_data = [
         {
@@ -239,8 +267,8 @@ def test_parse_func_str():
         },
         # TODO: broken, fix later
         # {
-            # 'raw': 'myfunc(test, 123,value=123,name=["xxx")',
-            # 'raises': True
+        # 'raw': 'myfunc(test, 123,value=123,name=["xxx")',
+        # 'raises': True
         # },
     ]
 
