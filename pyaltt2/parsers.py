@@ -19,7 +19,7 @@ def val_to_boolean(val):
         ValueError: if value can not be converted
     """
     if val is None: return None
-    elif isinstance(val, bool): return s
+    elif isinstance(val, bool): return val
     else:
         val = str(val)
         if val.lower() in ['1', 'true', 'yes', 'on', 'y']: return True

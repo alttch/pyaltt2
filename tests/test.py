@@ -116,9 +116,11 @@ def test_netacl_match():
 
 
 def test_val_to_boolean():
+    assert pyaltt2.parsers.val_to_boolean(True) is True
+    assert pyaltt2.parsers.val_to_boolean(False) is False
+    assert pyaltt2.parsers.val_to_boolean(None) is None
     assert pyaltt2.parsers.val_to_boolean(1) is True
     assert pyaltt2.parsers.val_to_boolean(0) is False
-    assert pyaltt2.parsers.val_to_boolean(None) is None
     for s in ['True', 'true', 'Yes', 'on', 'y']:
         assert pyaltt2.parsers.val_to_boolean(s) is True
     for s in ['False', 'false', 'no', 'OFF', 'n']:
