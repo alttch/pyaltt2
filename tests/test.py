@@ -12,6 +12,8 @@ import pyaltt2.locker
 import pyaltt2.network
 import pyaltt2.parsers
 import pyaltt2.nlp
+import pyaltt2.converters
+import pyaltt2.json
 
 from types import SimpleNamespace
 
@@ -284,3 +286,24 @@ def test_parse_func_str():
             assert t.get('args', []) == args
             for k, v in t.get('kwargs', {}).items():
                 assert kwargs[k] == v
+
+
+def test_merge_dict():
+    d1 = {'a': 2, 'b': 3, 'c': {'test': True}}
+    d2 = {'a': 3, 'c': {'test2': True}}
+    d3 = {'x': 9, 'b': 3, 'c': {'test3': True}}
+    merged = pyaltt2.converters.merge_dict(d1, d2, d3)
+    assert merged['a'] == 3
+    assert merged['b'] == 3
+    assert merged['c']['test']
+    assert merged['c']['test2']
+    assert merged['c']['test3']
+    assert merged['x'] == 9
+
+
+def test_json():
+    data = {'a': 2, 'b': 3, 'c': [1, 2, 3, 'test']}
+    u = pyaltt2.json.dumps(data, unpicklable=True)
+    d = pyaltt2.json.dumps(data, pretty=True)
+    d2 = pyaltt2.json.dumps(data, pretty=False)
+    pyaltt2.json.jprint(data)
