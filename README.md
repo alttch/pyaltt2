@@ -1,5 +1,5 @@
 # pyaltt2
 
-Common functions
+Altertech common Python function library
 
 Docs: https://pyaltt2.readthedocs.io/
