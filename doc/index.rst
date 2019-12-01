@@ -1,5 +1,5 @@
-Altertech common Python function library
-****************************************
+Altertech common Python functions library
+*****************************************
 
 .. toctree::
    :maxdepth: 1
