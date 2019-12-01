@@ -1,9 +1,9 @@
-def gen_random_str(length=64):
+def gen_random_str(length=32):
     """
     Generate random string (letters+numbers)
 
     Args:
-        length: string length (default: 64)
+        length: string length (default: 32)
     """
     import string
     import random
