@@ -10,9 +10,8 @@ sys.path.insert(0, Path().absolute().parent.as_posix())
 import pyaltt2.crypto
 import pyaltt2.locker
 import pyaltt2.network
-import pyaltt2.parsers
-import pyaltt2.nlp
 import pyaltt2.converters
+import pyaltt2.nlp
 import pyaltt2.json
 
 from types import SimpleNamespace
@@ -118,26 +117,26 @@ def test_netacl_match():
 
 
 def test_val_to_boolean():
-    assert pyaltt2.parsers.val_to_boolean(True) is True
-    assert pyaltt2.parsers.val_to_boolean(False) is False
-    assert pyaltt2.parsers.val_to_boolean(None) is None
-    assert pyaltt2.parsers.val_to_boolean(1) is True
-    assert pyaltt2.parsers.val_to_boolean(0) is False
+    assert pyaltt2.converters.val_to_boolean(True) is True
+    assert pyaltt2.converters.val_to_boolean(False) is False
+    assert pyaltt2.converters.val_to_boolean(None) is None
+    assert pyaltt2.converters.val_to_boolean(1) is True
+    assert pyaltt2.converters.val_to_boolean(0) is False
     for s in ['True', 'true', 'Yes', 'on', 'y']:
-        assert pyaltt2.parsers.val_to_boolean(s) is True
+        assert pyaltt2.converters.val_to_boolean(s) is True
     for s in ['False', 'false', 'no', 'OFF', 'n']:
-        assert pyaltt2.parsers.val_to_boolean(s) is False
+        assert pyaltt2.converters.val_to_boolean(s) is False
     for s in ['Falsex', 'falsex', 'ano', 'xOFF', 'z']:
         with pytest.raises(ValueError):
-            assert pyaltt2.parsers.val_to_boolean(s)
+            assert pyaltt2.converters.val_to_boolean(s)
 
 
 def test_safe_int():
-    assert pyaltt2.parsers.safe_int(20) == 20
-    assert pyaltt2.parsers.safe_int('20') == 20
-    assert pyaltt2.parsers.safe_int('0xFF') == 255
+    assert pyaltt2.converters.safe_int(20) == 20
+    assert pyaltt2.converters.safe_int('20') == 20
+    assert pyaltt2.converters.safe_int('0xFF') == 255
     with pytest.raises(ValueError):
-        assert pyaltt2.parsers.safe_int('0xFZ')
+        assert pyaltt2.converters.safe_int('0xFZ')
 
 
 def test_parse_date():
@@ -147,11 +146,11 @@ def test_parse_date():
     test_data = [(d, d), (ts, d), (3001, datetime(1970, 1, 1, 0, 50, 1)),
                  ('2019-11-22', datetime(2019, 11, 22))]
     for t in test_data:
-        assert pyaltt2.parsers.parse_date(t[0], return_timestamp=False) == t[1]
-    assert pyaltt2.parsers.parse_date(2019) == 1575158400.0
+        assert pyaltt2.converters.parse_date(t[0],
+                                             return_timestamp=False) == t[1]
     test_data = [(d, ts), (ts, ts), (3001, 3001)]
     for t in test_data:
-        assert pyaltt2.parsers.parse_date(t[0]) == t[1]
+        assert pyaltt2.converters.parse_date(t[0]) == t[1]
 
 
 test_parse_date()
@@ -167,10 +166,10 @@ def test_parse_number():
     for d in test_data:
         s = d[0]
         v = d[1]
-        assert pyaltt2.parsers.parse_number(s) == v
+        assert pyaltt2.converters.parse_number(s) == v
         if isinstance(s, str): s = '-' + s
         else: s = -1 * s
-        assert pyaltt2.parsers.parse_number(s) == -1 * v
+        assert pyaltt2.converters.parse_number(s) == -1 * v
 
 
 def test_parse_func_str():
