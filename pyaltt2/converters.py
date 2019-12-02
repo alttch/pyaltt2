@@ -35,8 +35,8 @@ def val_to_boolean(val):
 
     Integer: 1 = True, 0 = False
 
-    String (case-insensitive): 1, 'true', 'yes', 'on', 'y' = True
-                               0, 'false', 'no', 'off', 'n' = False
+    String (case-insensitive): 1, 'true', 't', 'yes', 'on', 'y' = True
+                               0, 'false', 'f', 'no', 'off', 'n' = False
 
     Args:
         val: value to convert
@@ -51,8 +51,8 @@ def val_to_boolean(val):
     elif isinstance(val, bool): return val
     else:
         val = str(val)
-        if val.lower() in ['1', 'true', 'yes', 'on', 'y']: return True
-        elif val.lower() in ['0', 'false', 'no', 'off', 'n']: return False
+        if val.lower() in ['1', 't', 'true', 'yes', 'on', 'y']: return True
+        elif val.lower() in ['0', 'f', 'false', 'no', 'off', 'n']: return False
         else: raise ValueError
 
 
