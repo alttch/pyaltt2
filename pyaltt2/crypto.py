@@ -11,41 +11,25 @@ def gen_random_str(length=32):
     return ''.join(random.choice(symbols) for i in range(length))
 
 
-def _pad_key(key):
-    l = len(key)
-    if l == 16 or l == 24 or l == 32:
-        return key
-    elif l < 16:
-        return key.ljust(16)
-    elif l < 24:
-        return key.ljust(24)
-    elif l < 32:
-        return key.ljust(32)
-    else:
-        return key[:32]
-
-
-def encrypt(raw, key, encode=True):
+def encrypt(raw, key, encode=True, bits=256):
     """
     Encrypt bytes with AES-CBC
-
-    For AES-128: key size <= 16 bytes
-    For AES-192: key size <= 24 bytes
-    For AES-256: key size <= 32 bytes
-
-    Keys, longer than 32 bytes, are truncated
 
     Args:
         raw: bytes to encrypt
         key: encryption key
         encode: encode result in base64 (default: True)
+        bits: key size (128, 192 or 256, default is 256)
     """
     from Crypto.Cipher import AES
     from Crypto import Random
+    import hashlib
+    keyhash = hashlib.sha256(
+        key.encode() if isinstance(key, str) else key).digest()[:bits // 8]
     length = 16 - (len(raw) % 16)
     raw += bytes([length]) * length
     iv = Random.new().read(AES.block_size)
-    cipher = AES.new(_pad_key(key), AES.MODE_CBC, iv)
+    cipher = AES.new(keyhash, AES.MODE_CBC, iv)
     val = iv + cipher.encrypt(raw)
     if encode:
         import base64
@@ -54,7 +38,7 @@ def encrypt(raw, key, encode=True):
         return val
 
 
-def decrypt(enc, key, decode=True):
+def decrypt(enc, key, decode=True, bits=256):
     """
     Decrypt encoded data with AES-CBC
 
@@ -62,12 +46,16 @@ def decrypt(enc, key, decode=True):
         enc: data to decrypt
         key: decryption key
         decode: decode data from base64 (default: True)
+        bits: key size (128, 192 or 256, default is 256)
     """
     from Crypto.Cipher import AES
+    import hashlib
     if decode:
         import base64
         enc = base64.b64decode(enc)
+    keyhash = hashlib.sha256(
+        key.encode() if isinstance(key, str) else key).digest()[:bits // 8]
     iv = enc[:16]
-    cipher = AES.new(_pad_key(key), AES.MODE_CBC, iv)
+    cipher = AES.new(keyhash, AES.MODE_CBC, iv)
     data = cipher.decrypt(enc[16:])
     return data[:-data[-1]]
