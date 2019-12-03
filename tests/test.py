@@ -67,19 +67,19 @@ def test_crypto_encrypt_decrypt():
                                          key,
                                          key_is_hash=use_key_hash,
                                          hmac_key=use_hmac,
-                                         encode=False)
+                                         b64=False)
             assert isinstance(enc, bytes)
             assert pyaltt2.crypto.decrypt(enc,
                                           key,
                                           key_is_hash=use_key_hash,
                                           hmac_key=use_hmac,
-                                          decode=False).decode() == value
+                                          b64=False).decode() == value
             try:
                 assert pyaltt2.crypto.decrypt(enc,
                                               '123',
                                               key_is_hash=False,
                                               hmac_key=use_hmac,
-                                              decode=False).decode() != value
+                                              b64=False).decode() != value
             except e:
                 pass
 

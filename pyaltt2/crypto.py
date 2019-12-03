@@ -11,7 +11,7 @@ def gen_random_str(length=32):
     return ''.join(random.choice(symbols) for i in range(length))
 
 
-def encrypt(raw, key, hmac_key=None, key_is_hash=False, encode=True, bits=256):
+def encrypt(raw, key, hmac_key=None, key_is_hash=False, b64=True, bits=256):
     """
     Encrypt bytes with AES-CBC
 
@@ -20,7 +20,7 @@ def encrypt(raw, key, hmac_key=None, key_is_hash=False, encode=True, bits=256):
         key: encryption key
         hmac_key: HMAC key (optional), True or custom key
         key_is_hash: consider encryption key is sha256 hash
-        encode: encode result in base64 (default: True)
+        b64: encode result in base64 (default: True)
         bits: key size (128, 192 or 256, default is 256)
     Returns:
         encrypted block + 32-byte HMAC signature (if hmac_key is specified)
@@ -48,14 +48,14 @@ def encrypt(raw, key, hmac_key=None, key_is_hash=False, encode=True, bits=256):
         val += hmac.new(
             hmac_key.encode() if isinstance(hmac_key, str) else hmac_key, val,
             hashlib.sha256).digest()
-    if encode:
+    if b64:
         import base64
         return base64.b64encode(val).decode()
     else:
         return val
 
 
-def decrypt(enc, key, hmac_key=None, key_is_hash=False, decode=True, bits=256):
+def decrypt(enc, key, hmac_key=None, key_is_hash=False, b64=True, bits=256):
     """
     Decrypt encoded data with AES-CBC
 
@@ -64,7 +64,7 @@ def decrypt(enc, key, hmac_key=None, key_is_hash=False, decode=True, bits=256):
         key: decryption key
         key_is_hash: consider decryption key is sha256 hash
         hmac_key: HMAC key (optional), True or custom key
-        decode: decode data from base64 (default: True)
+        b64: decode data from base64 (default: True)
         bits: key size (128, 192 or 256, default is 256)
     Raises:
         ValueError: if HMAC auth failed
@@ -74,7 +74,7 @@ def decrypt(enc, key, hmac_key=None, key_is_hash=False, decode=True, bits=256):
     from Crypto.Cipher import AES
     import hashlib
     import hmac
-    if decode:
+    if b64:
         import base64
         enc = base64.b64decode(enc)
     if hmac_key is True:
