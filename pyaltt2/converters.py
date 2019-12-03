@@ -33,10 +33,9 @@ def val_to_boolean(val):
 
     Boolean: return as-is
 
-    Integer: 1 = True, 0 = False
-
-    String (case-insensitive): 1, 'true', 't', 'yes', 'on', 'y' = True
-                               0, 'false', 'f', 'no', 'off', 'n' = False
+    - Integer: 1 = True, 0 = False
+    - Strings (case-insensitive): '1', 'true', 't', 'yes', 'on', 'y' = True
+    - '0', 'false', 'f', 'no', 'off', 'n' = False
 
     Args:
         val: value to convert
@@ -121,12 +120,12 @@ def parse_number(val):
 
     Valid values are:
 
-        any float / integer
-        123.45
-        123 456.899
-        123,456.899
-        123 456,899
-        123.456,82
+    - any float / integer
+    - 123.45
+    - 123 456.899
+    - 123,456.899
+    - 123 456,899
+    - 123.456,82
 
     Args:
         val: value to parse
