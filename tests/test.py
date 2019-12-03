@@ -31,32 +31,57 @@ def test_crypto_gen_random_str():
 
 def test_crypto_encrypt_decrypt():
 
-    key = 'mysecretkey1234567'
+    private_key = 'mysecretkey1234567'
     value = 'hello, I am string'
 
-    for use_hmac, e in zip((False, True, 'hmackey'),
-                           (UnicodeDecodeError, ValueError, ValueError)):
-        enc = pyaltt2.crypto.encrypt(value.encode(), key, hmac_key=use_hmac)
-        assert isinstance(enc, str)
-        assert pyaltt2.crypto.decrypt(enc, key,
-                                      hmac_key=use_hmac).decode() == value
-        try:
-            assert pyaltt2.crypto.decrypt(enc, '123').decode() != value
-        except e:
-            pass
+    import hashlib
 
-        enc = pyaltt2.crypto.encrypt(value.encode(),
-                                     key,
-                                     hmac_key=use_hmac,
-                                     encode=False)
-        assert isinstance(enc, bytes)
-        assert pyaltt2.crypto.decrypt(enc, key, hmac_key=use_hmac,
-                                      decode=False).decode() == value
-        try:
-            assert pyaltt2.crypto.decrypt(
-                enc, '123', hmac_key=use_hmac, decode=False).decode() != value
-        except e:
-            pass
+    keyhash256 = hashlib.sha256(private_key.encode()).digest()
+    keyhash512 = hashlib.sha512(private_key.encode()).digest()
+
+    for use_key_hash in (False, True):
+
+        for use_hmac, e in zip((False, True, 'hmackey'),
+                               (UnicodeDecodeError, ValueError, ValueError)):
+
+            if use_key_hash:
+                key = keyhash512 if use_hmac is True else keyhash256
+            else:
+                key = private_key
+
+            enc = pyaltt2.crypto.encrypt(value.encode(),
+                                         key,
+                                         key_is_hash=use_key_hash,
+                                         hmac_key=use_hmac)
+            assert isinstance(enc, str)
+            assert pyaltt2.crypto.decrypt(enc,
+                                          key,
+                                          key_is_hash=use_key_hash,
+                                          hmac_key=use_hmac).decode() == value
+            try:
+                assert pyaltt2.crypto.decrypt(enc, '123').decode() != value
+            except e:
+                pass
+
+            enc = pyaltt2.crypto.encrypt(value.encode(),
+                                         key,
+                                         key_is_hash=use_key_hash,
+                                         hmac_key=use_hmac,
+                                         encode=False)
+            assert isinstance(enc, bytes)
+            assert pyaltt2.crypto.decrypt(enc,
+                                          key,
+                                          key_is_hash=use_key_hash,
+                                          hmac_key=use_hmac,
+                                          decode=False).decode() == value
+            try:
+                assert pyaltt2.crypto.decrypt(enc,
+                                              '123',
+                                              key_is_hash=False,
+                                              hmac_key=use_hmac,
+                                              decode=False).decode() != value
+            except e:
+                pass
 
 
 def test_locker():

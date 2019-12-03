@@ -11,7 +11,7 @@ def gen_random_str(length=32):
     return ''.join(random.choice(symbols) for i in range(length))
 
 
-def encrypt(raw, key, hmac_key=None, encode=True, bits=256):
+def encrypt(raw, key, hmac_key=None, key_is_hash=False, encode=True, bits=256):
     """
     Encrypt bytes with AES-CBC
 
@@ -19,22 +19,25 @@ def encrypt(raw, key, hmac_key=None, encode=True, bits=256):
         raw: bytes to encrypt
         key: encryption key
         hmac_key: HMAC key (optional), True or custom key
+        key_is_hash: consider encryption key is sha256 hash
         encode: encode result in base64 (default: True)
         bits: key size (128, 192 or 256, default is 256)
     Returns:
         encrypted block + 32-byte HMAC signature (if hmac_key is specified)
+
+    note: if hmac_key is True and key is hash, sha512 sum is required
     """
     from Crypto.Cipher import AES
     from Crypto import Random
     import hashlib
     import hmac
     if hmac_key is True:
-        h = hashlib.sha512(
+        h = key if key_is_hash else hashlib.sha512(
             key.encode() if isinstance(key, str) else key).digest()
         keyhash = h[:bits // 8]
         hmac_key = h[:-32]
     else:
-        keyhash = hashlib.sha256(
+        keyhash = key if key_is_hash else hashlib.sha256(
             key.encode() if isinstance(key, str) else key).digest()[:bits // 8]
     length = 16 - (len(raw) % 16)
     raw += b'\x00' * (length - 1) + bytes([length])
@@ -52,18 +55,21 @@ def encrypt(raw, key, hmac_key=None, encode=True, bits=256):
         return val
 
 
-def decrypt(enc, key, hmac_key=None, decode=True, bits=256):
+def decrypt(enc, key, hmac_key=None, key_is_hash=False, decode=True, bits=256):
     """
     Decrypt encoded data with AES-CBC
 
     Args:
         enc: data to decrypt
         key: decryption key
+        key_is_hash: consider decryption key is sha256 hash
         hmac_key: HMAC key (optional), True or custom key
         decode: decode data from base64 (default: True)
         bits: key size (128, 192 or 256, default is 256)
     Raises:
         ValueError: if HMAC auth failed
+
+    note: if hmac_key is True and key is hash, sha512 sum is required
     """
     from Crypto.Cipher import AES
     import hashlib
@@ -72,12 +78,12 @@ def decrypt(enc, key, hmac_key=None, decode=True, bits=256):
         import base64
         enc = base64.b64decode(enc)
     if hmac_key is True:
-        h = hashlib.sha512(
+        h = key if key_is_hash else hashlib.sha512(
             key.encode() if isinstance(key, str) else key).digest()
         keyhash = h[:bits // 8]
         hmac_key = h[:-32]
     else:
-        keyhash = hashlib.sha256(
+        keyhash = key if key_is_hash else hashlib.sha256(
             key.encode() if isinstance(key, str) else key).digest()[:bits // 8]
     iv = enc[:16]
     if hmac_key:
