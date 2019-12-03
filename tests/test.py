@@ -31,10 +31,10 @@ def test_crypto_gen_random_str():
 
 def test_crypto_encrypt_decrypt():
 
-    key = 'mysecretkey'
+    key = 'mysecretkey1234567'
     value = 'hello, I am string'
 
-    for use_hmac, e in zip((False, 'hmackey'),
+    for use_hmac, e in zip((False, True, 'hmackey'),
                            (UnicodeDecodeError, ValueError, ValueError)):
         enc = pyaltt2.crypto.encrypt(value.encode(), key, hmac_key=use_hmac)
         assert isinstance(enc, str)
