@@ -27,7 +27,7 @@ def encrypt(raw, key, encode=True, bits=256):
     keyhash = hashlib.sha256(
         key.encode() if isinstance(key, str) else key).digest()[:bits // 8]
     length = 16 - (len(raw) % 16)
-    raw += bytes([length]) * length
+    raw += b'\x00' * (length - 1) + bytes([length])
     iv = Random.new().read(AES.block_size)
     cipher = AES.new(keyhash, AES.MODE_CBC, iv)
     val = iv + cipher.encrypt(raw)
