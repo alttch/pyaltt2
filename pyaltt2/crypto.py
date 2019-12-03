@@ -31,6 +31,7 @@ def encrypt(raw, key, hmac_key=None, key_is_hash=False, b64=True, bits=256):
     from Crypto import Random
     import hashlib
     import hmac
+    if isinstance(raw, str): raw = raw.encode()
     if hmac_key is True:
         h = key if key_is_hash else hashlib.sha512(
             key.encode() if isinstance(key, str) else key).digest()
@@ -94,3 +95,51 @@ def decrypt(enc, key, hmac_key=None, key_is_hash=False, b64=True, bits=256):
     cipher = AES.new(keyhash, AES.MODE_CBC, iv)
     data = cipher.decrypt(enc[16:-32 if hmac_key else None])
     return data[:-data[-1]]
+
+
+class Rioja:
+    """
+    Rioja (ˈrjoxa) is a crypto engine, similar to Fernet, but:
+
+    - implements AES-CBC-HMAC up to AES256 (default)
+    - more simple to use
+    """
+
+    def __init__(self, key, bits=256):
+        """
+        Args:
+            key: encryption key
+            bits: key size (128, 192 or 256, default is 256)
+        """
+        import hashlib
+        self.__keyhash = hashlib.sha512(
+            key.encode() if isinstance(key, str) else key).digest()
+        self.__bits = bits
+
+    def encrypt(self, raw, b64=True):
+        """
+        Args:
+            raw: bytes to encrypt
+            b64: encode result in base64 (default: True)
+        """
+        return encrypt(raw,
+                       self.__keyhash,
+                       hmac_key=True,
+                       key_is_hash=True,
+                       b64=b64,
+                       bits=self.__bits)
+
+    def decrypt(self, enc, b64=True):
+        """
+        Args:
+            enc: data to decrypt
+            b64: decode data from base64 (default: True)
+        Raises:
+            ValueError: if HMAC auth failed
+        """
+        return decrypt(enc,
+                       self.__keyhash,
+                       hmac_key=True,
+                       key_is_hash=True,
+                       b64=b64,
+                       bits=self.__bits)

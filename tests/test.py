@@ -75,13 +75,36 @@ def test_crypto_encrypt_decrypt():
                                           hmac_key=use_hmac,
                                           b64=False).decode() == value
             try:
-                assert pyaltt2.crypto.decrypt(enc,
-                                              '123',
-                                              key_is_hash=False,
-                                              hmac_key=use_hmac,
-                                              b64=False).decode() != value
+                assert pyaltt2.crypto.decrypt(
+                    enc, '123', key_is_hash=False, hmac_key=use_hmac,
+                    b64=False).decode() != value
             except e:
                 pass
+
+
+def test_crypto_rioja():
+
+    private_key = 'mysecretkey1234567'
+    value = 'hello, I am string'
+
+    rj = pyaltt2.crypto.Rioja(private_key)
+    rj2 = pyaltt2.crypto.Rioja('123')
+
+    enc = rj.encrypt(value)
+    assert isinstance(enc, str)
+    assert rj.decrypt(enc).decode() == value
+    try:
+        assert rj2.decrypt(enc).decode() != value
+    except ValueError:
+        pass
+
+    enc = rj.encrypt(value.encode(), b64=False)
+    assert isinstance(enc, bytes)
+    assert rj.decrypt(enc, b64=False).decode() == value
+    try:
+        assert rj2.decrypt(enc, b64=False).decode() != value
+    except ValueError:
+        pass
 
 
 def test_locker():
