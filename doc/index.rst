@@ -6,6 +6,7 @@ Altertech common Python functions library
    
    converters
    crypto
+   json
    locker
    network
    nlp
