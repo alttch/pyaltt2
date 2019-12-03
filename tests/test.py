@@ -34,22 +34,29 @@ def test_crypto_encrypt_decrypt():
     key = 'mysecretkey'
     value = 'hello, I am string'
 
-    enc = pyaltt2.crypto.encrypt(value.encode(), key)
-    assert isinstance(enc, str)
-    assert pyaltt2.crypto.decrypt(enc, key).decode() == value
-    try:
-        assert pyaltt2.crypto.decrypt(enc, '123').decode() != value
-    except UnicodeDecodeError:
-        pass
+    for use_hmac, e in zip((False, 'hmackey'),
+                           (UnicodeDecodeError, ValueError, ValueError)):
+        enc = pyaltt2.crypto.encrypt(value.encode(), key, hmac_key=use_hmac)
+        assert isinstance(enc, str)
+        assert pyaltt2.crypto.decrypt(enc, key,
+                                      hmac_key=use_hmac).decode() == value
+        try:
+            assert pyaltt2.crypto.decrypt(enc, '123').decode() != value
+        except e:
+            pass
 
-    enc = pyaltt2.crypto.encrypt(value.encode(), key, encode=False)
-    assert isinstance(enc, bytes)
-    assert pyaltt2.crypto.decrypt(enc, key, decode=False).decode() == value
-    try:
-        assert pyaltt2.crypto.decrypt(enc, '123',
-                                      decode=False).decode() != value
-    except UnicodeDecodeError:
-        pass
+        enc = pyaltt2.crypto.encrypt(value.encode(),
+                                     key,
+                                     hmac_key=use_hmac,
+                                     encode=False)
+        assert isinstance(enc, bytes)
+        assert pyaltt2.crypto.decrypt(enc, key, hmac_key=use_hmac,
+                                      decode=False).decode() == value
+        try:
+            assert pyaltt2.crypto.decrypt(
+                enc, '123', hmac_key=use_hmac, decode=False).decode() != value
+        except e:
+            pass
 
 
 def test_locker():
