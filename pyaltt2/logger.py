@@ -12,7 +12,7 @@ from types import SimpleNamespace
 
 config = SimpleNamespace(
         log_file=None, # log file to write to
-        log_stdout=False,
+        log_stdout=2, # 0 - do not log, 1 - log, 2 - log auto
         syslog=None,
         level=10,
         tracebacks=False, # log exception tracebacks
@@ -84,11 +84,6 @@ def init(**kwargs):
         file_handler = logging.handlers.WatchedFileHandler(config.log_file)
         file_handler.setFormatter(config.formatter)
         __data.logger.addHandler(file_handler)
-    if config.log_stdout:
-        has_handler = True
-        stdout_handler = StdoutHandler()
-        stdout_handler.setFormatter(config.formatter)
-        __data.logger.addHandler(stdout_handler)
     # TODO: memory handler
     if config.syslog:
         has_handler = True
@@ -109,6 +104,12 @@ def init(**kwargs):
             syslog_handler.setFormatter(config.syslog_formatter if config.
                                         syslog_formatter else config.formatter)
             __data.logger.addHandler(syslog_handler)
+    if (not has_handler and config.log_stdout == 2) or \
+            config.log_stdout is True or config.log_stdout == 1:
+        has_handler = True
+        stdout_handler = StdoutHandler()
+        stdout_handler.setFormatter(config.formatter)
+        __data.logger.addHandler(stdout_handler)
     if not has_handler:
         # mute all logs
         __data.logger.addHandler(DummyHandler())
