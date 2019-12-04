@@ -11,7 +11,7 @@ import pyaltt2.logger
 log_file=None
 # log_file='test.log'
 
-pyaltt2.logger.init(log_file=log_file, level=10)
+pyaltt2.logger.init(log_file=log_file, log_stdout=True, syslog=True, level=10)
 # pyaltt2.logger.config.colorize=False
 
 
@@ -27,5 +27,4 @@ test_logging()
 import os
 import signal
 os.system('mv test.log test.log.1')
-os.kill(os.getpid(), signal.SIGHUP)
 test_logging()
