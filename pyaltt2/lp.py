@@ -18,9 +18,15 @@ def parse_func_str(val):
     import textwrap
     if '(' not in val:
         raise ValueError
+    val = val.strip()
     fname = val.split('(', 1)[0].strip()
-    if function_wrong_symbols.search(fname):
+    if not fname or function_wrong_symbols.search(fname):
         raise ValueError('Invalid symbols in function name')
+    if fname[0] in ('@', '!', '?'):
+        pfx = fname[0]
+        fname = fname[1:]
+    else:
+        pfx = ''
     # check val suffix to avoid injections
     try:
         if val.rsplit(')', 1)[1].strip(): raise ValueError
@@ -31,10 +37,10 @@ def parse_func_str(val):
         global a, kw
         a = args
         kw = kwargs
-    {}""").format(fname, val)
+    {}""").format(fname, val[len(pfx):])
     d = {}
     try:
         exec(code, d)
     except Exception as e:
         raise ValueError(str(e))
-    return fname, d['a'], d['kw']
+    return pfx + fname, d['a'], d['kw']

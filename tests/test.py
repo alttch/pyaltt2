@@ -240,8 +240,8 @@ def test_parse_func_str():
         'fname': 'myfunc',
         'args': ('test',)
     }, {
-        'raw': 'myfunc("test")',
-        'fname': 'myfunc',
+        'raw': '@myfunc("test")',
+        'fname': '@myfunc',
         'args': ('test',)
     }, {
         'raw': 'myfunc(\'tes"t\')',
