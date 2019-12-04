@@ -33,13 +33,9 @@ class StdoutHandler(logging.StreamHandler):
             super().emit(record)
 
     def format(self, record):
-        if config.colorize:
-            r = super().format(record)
-            return neotermcolor.colored(r,
-                                        style='logger:{}'.format(
-                                            record.levelno))
-        else:
-            return super().format(record)
+        r = super().format(record)
+        return neotermcolor.colored(r, style='logger:{}'.format(
+            record.levelno)) if config.colorize else r
 
 
 def log_traceback():

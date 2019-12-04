@@ -9,7 +9,7 @@ sys.path.insert(0, Path().absolute().parent.as_posix())
 import pyaltt2.logger
 
 log_file=None
-log_file='test.log'
+# log_file='test.log'
 
 pyaltt2.logger.init(log_file=log_file, level=10)
 # pyaltt2.logger.config.colorize=False
