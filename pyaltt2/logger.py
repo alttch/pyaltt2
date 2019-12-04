@@ -61,8 +61,10 @@ def log_traceback():
 
 
 def set_debug(debug=False):
-    # TODO
-    pass
+    level = 10 if debug else config.level
+    logging.basicConfig(level=level)
+    if __data.logger:
+        __data.logger.setLevel(level)
 
 
 def init(**kwargs):
