@@ -11,7 +11,7 @@ import pyaltt2.crypto
 import pyaltt2.locker
 import pyaltt2.network
 import pyaltt2.converters
-import pyaltt2.nlp
+import pyaltt2.lp
 import pyaltt2.json
 
 from types import SimpleNamespace
@@ -322,9 +322,9 @@ def test_parse_func_str():
     for t in test_data:
         if t.get('raises'):
             with pytest.raises(ValueError):
-                pyaltt2.nlp.parse_func_str(t['raw'])
+                pyaltt2.lp.parse_func_str(t['raw'])
         else:
-            fname, args, kwargs = pyaltt2.nlp.parse_func_str(t['raw'])
+            fname, args, kwargs = pyaltt2.lp.parse_func_str(t['raw'])
             assert t['fname'] == fname
             assert len(t.get('args', ())) == len(args)
             assert len(t.get('kwargs', {})) == len(kwargs)
