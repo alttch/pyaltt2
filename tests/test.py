@@ -228,110 +228,93 @@ def test_parse_number():
 
 
 def test_parse_func_str():
-    test_data = [
-        {
-            'raw': 'myfunc()',
-            'fname': 'myfunc'
-        },
-        {
-            'raw': 'myfunc(1,2,3)',
-            'fname': 'myfunc',
-            'args': [1, 2, 3]
-        },
-        {
-            'raw': 'myfunc(test)',
-            'fname': 'myfunc',
-            'args': ['test']
-        },
-        # TODO: broken
-        # {
-        # 'raw': 'myfunc("test")',
-        # 'fname': 'myfunc',
-        # 'args': ['test']
-        # },
-        # TODO: broken, fix later
-        # {
-        # 'raw': 'myfunc(\'tes"t\')',
-        # 'fname': 'myfunc',
-        # 'args': ['tes"t']
-        # },
-        # TODO: broken
-        # {
-        # 'raw': 'myfunc(\'test\')',
-        # 'fname': 'myfunc',
-        # 'args': ['test']
-        # },
-        {
-            'raw': 'myfunc(test, 123.45)',
-            'fname': 'myfunc',
-            'args': ['test', 123.45]
-        },
-        # TODO: broken
-        # {
-        # 'raw': 'myfunc(123.45, test)',
-        # 'fname': 'myfunc',
-        # 'args': [123.45, 'test']
-        # },
-        {
-            'raw': 'myfunc(test, 123,value=123,name=xxx)',
-            'fname': 'myfunc',
-            'args': ['test', 123],
-            'kwargs': {
-                'name': 'xxx',
-                'value': 123
-            }
-        },
-        {
-            'raw': 'myfunc(test, 123,value=123,name=\'xxx\')',
-            'fname': 'myfunc',
-            'args': ['test', 123],
-            'kwargs': {
-                'name': 'xxx',
-                'value': 123
-            }
-        },
-        {
-            'raw': 'myfunc(test, 123,value=123,name="xxx")',
-            'fname': 'myfunc',
-            'args': ['test', 123],
-            'kwargs': {
-                'name': 'xxx',
-                'value': 123
-            }
-        },
-        {
-            'raw': 'myfunc(test, 123,value=123,name=\'x"xx\')',
-            'fname': 'myfunc',
-            'args': ['test', 123],
-            'kwargs': {
-                'name': 'x"xx',
-                'value': 123
-            }
-        },
-        # TODO: broken
-        # {
-        # 'raw': 'myfunc(test, 123,value=123.45,name=xxx)',
-        # 'fname': 'myfunc',
-        # 'args': ['test', 123],
-        # 'kwargs': {
-        # 'name': 'xxx',
-        # 'value': 123.45
-        # }
-        # },
-        {
-            'raw': 'myfunctest, 123,value=123,name="xxx")',
-            'raises': True
-        },
-        {
-            'raw': 'myfunc(test, 123,value=123,name="xxx"',
-            'raises': True
-        },
-        # TODO: broken, fix later
-        # {
-        # 'raw': 'myfunc(test, 123,value=123,name=["xxx")',
-        # 'raises': True
-        # },
-    ]
+    test_data = [{
+        'raw': 'myfunc()',
+        'fname': 'myfunc'
+    }, {
+        'raw': 'myfunc(1,2,3)',
+        'fname': 'myfunc',
+        'args': (1, 2, 3)
+    }, {
+        'raw': 'myfunc("test")',
+        'fname': 'myfunc',
+        'args': ('test',)
+    }, {
+        'raw': 'myfunc("test")',
+        'fname': 'myfunc',
+        'args': ('test',)
+    }, {
+        'raw': 'myfunc(\'tes"t\')',
+        'fname': 'myfunc',
+        'args': ('tes"t',)
+    }, {
+        'raw': 'myfunc(\'test\')',
+        'fname': 'myfunc',
+        'args': ('test',)
+    }, {
+        'raw': 'myfunc("test", 123.45)',
+        'fname': 'myfunc',
+        'args': ('test', 123.45)
+    }, {
+        'raw': 'myfunc(123.45, \'test\')',
+        'fname': 'myfunc',
+        'args': (123.45, 'test')
+    }, {
+        'raw': 'myfunc("test", 123,value=123,name="xxx")',
+        'fname': 'myfunc',
+        'args': ('test', 123),
+        'kwargs': {
+            'name': 'xxx',
+            'value': 123
+        }
+    }, {
+        'raw': 'myfunc(\'test\', 123,value=123,name=\'xxx\')',
+        'fname': 'myfunc',
+        'args': ('test', 123),
+        'kwargs': {
+            'name': 'xxx',
+            'value': 123
+        }
+    }, {
+        'raw': 'myfunc(\'test\', 123,value=123,name="xxx")',
+        'fname': 'myfunc',
+        'args': ('test', 123),
+        'kwargs': {
+            'name': 'xxx',
+            'value': 123
+        }
+    }, {
+        'raw': 'myfunc("test", 123,value=123,name=\'x"xx\')',
+        'fname': 'myfunc',
+        'args': ('test', 123),
+        'kwargs': {
+            'name': 'x"xx',
+            'value': 123
+        }
+    }, {
+        'raw': 'myfunc("test", 123,value=123.45,name="xxx")',
+        'fname': 'myfunc',
+        'args': ('test', 123),
+        'kwargs': {
+            'name': 'xxx',
+            'value': 123.45
+        }
+    }, {
+        'raw': 'myfunctest, 123,value=123,name="xxx")',
+        'raises': True
+    }, {
+        'raw': 'myfunc(test, 123,value=123,name="xxx"',
+        'raises': True
+    }, {
+        'raw': 'myfunc(test, 123,value=123,name=["xxx")',
+        'raises': True
+    }, {
+        'raw': 'my func(test, 123,value=123,name=["xxx")',
+        'raises': True
+    }, {
+        'raw': 'my"func(test, 123,value=123,name=["xxx")',
+        'raises': True
+    }]
 
     for t in test_data:
         if t.get('raises'):
@@ -340,9 +323,9 @@ def test_parse_func_str():
         else:
             fname, args, kwargs = pyaltt2.nlp.parse_func_str(t['raw'])
             assert t['fname'] == fname
-            assert len(t.get('args', [])) == len(args)
+            assert len(t.get('args', ())) == len(args)
             assert len(t.get('kwargs', {})) == len(kwargs)
-            assert t.get('args', []) == args
+            assert t.get('args', ()) == args
             for k, v in t.get('kwargs', {}).items():
                 assert kwargs[k] == v
 
