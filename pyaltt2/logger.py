@@ -54,8 +54,8 @@ def set_debug(debug=False):
 
 def sighandler_hup(signum, frame):
     try:
-        reset()
-        logging.info('log file rotated')
+        if reset():
+            logging.info('log file rotated')
     except:
         log_traceback()
 
@@ -71,6 +71,9 @@ def reset(_initial=False):
         __data.log_file_handler = logging.FileHandler(config.log_file)
         __data.log_file_handler.setFormatter(config.formatter)
         __data.logger.addHandler(__data.log_file_handler)
+        return True
+    else:
+        return False
 
 
 def init(log_file=None,
