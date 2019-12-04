@@ -8,6 +8,6 @@ Altertech common Python functions library
    crypto
    json
    locker
-   logger
+   logs
    lp
    network
