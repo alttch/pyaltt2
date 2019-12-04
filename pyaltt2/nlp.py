@@ -21,8 +21,9 @@ def parse_func_str(val):
     fname = val.split('(', 1)[0].strip()
     if function_wrong_symbols.search(fname):
         raise ValueError('Invalid symbols in function name')
+    # check val suffix to avoid injections
     try:
-        if val.rsplit(')', 1)[1]: raise ValueError
+        if val.rsplit(')', 1)[1].strip(): raise ValueError
     except IndexError:
         raise ValueError
     code = textwrap.dedent("""
