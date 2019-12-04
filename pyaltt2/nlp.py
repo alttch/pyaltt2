@@ -1,6 +1,7 @@
 import re
 function_wrong_symbols = re.compile(r"[\ \"\'\:;_\/<>{}[\]~`]")
 
+
 def parse_func_str(val):
     """
     Parse value as function string
@@ -20,6 +21,10 @@ def parse_func_str(val):
     fname = val.split('(', 1)[0].strip()
     if function_wrong_symbols.search(fname):
         raise ValueError('Invalid symbols in function name')
+    try:
+        if val.rsplit(')', 1)[1]: raise ValueError
+    except IndexError:
+        raise ValueError
     code = textwrap.dedent("""
     def {}(*args, **kwargs):
         global a, kw

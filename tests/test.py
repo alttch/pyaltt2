@@ -303,16 +303,19 @@ def test_parse_func_str():
         'raw': 'myfunctest, 123,value=123,name="xxx")',
         'raises': True
     }, {
-        'raw': 'myfunc(test, 123,value=123,name="xxx"',
+        'raw': 'myfunc("test", 123,value=123,name="xxx"',
         'raises': True
     }, {
-        'raw': 'myfunc(test, 123,value=123,name=["xxx")',
+        'raw': 'myfunc("test", 123,value=123,name=["xxx")',
         'raises': True
     }, {
-        'raw': 'my func(test, 123,value=123,name=["xxx")',
+        'raw': 'my func("test", 123,value=123,name=["xxx")',
         'raises': True
     }, {
-        'raw': 'my"func(test, 123,value=123,name=["xxx")',
+        'raw': 'my"func("test", 123,value=123,name=["xxx")',
+        'raises': True
+    }, {
+        'raw': 'myfunc(123); import sys',
         'raises': True
     }]
 
