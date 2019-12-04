@@ -9,9 +9,10 @@ def parse_func_str(val):
 
     Args:
         val: value to parse
-
     Returns:
         tuple: function-name, tuple of args, dict of kwargs
+    Raises:
+        ValueError: if function string can not be parsed
     """
     import textwrap
     if '(' not in val:
