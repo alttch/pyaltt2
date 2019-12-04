@@ -6,16 +6,16 @@ import logging
 
 sys.path.insert(0, Path().absolute().parent.as_posix())
 
-import pyaltt2.logger
+import pyaltt2.logs
 
 log_file = None
 # log_file='test.log'
 
-pyaltt2.logger.init(log_file=log_file,
+pyaltt2.logs.init(log_file=log_file,
                     level=30,
                     keep_exceptions=10,
                     tracebacks=True)
-# pyaltt2.logger.config.colorize=False
+# pyaltt2.logs.config.colorize=False
 
 
 def test_logging():
@@ -30,13 +30,13 @@ for i in range(11):
     try:
         raise ValueError('test')
     except:
-        pyaltt2.logger.log_traceback()
-pyaltt2.logger.set_debug(True)
+        pyaltt2.logs.log_traceback()
+pyaltt2.logs.set_debug(True)
 test_logging()
 import os
 import signal
-pyaltt2.logger.set_debug(False)
+pyaltt2.logs.set_debug(False)
 os.system('mv test.log test.log.1')
 test_logging()
-assert len(pyaltt2.logger.serialize()['exceptions']) == 10
+assert len(pyaltt2.logs.serialize()['exceptions']) == 10
 print('Completed')
