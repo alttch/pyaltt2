@@ -284,6 +284,15 @@ def test_parse_func_str():
             'value': 123
         }
     }, {
+        'raw': 'myfunc(test, 123,value=123, name=12.5)',
+        'fname': 'myfunc',
+        'args': ('test', 123),
+        'kwargs': {
+            'name': 12.5, # TODO
+            'value': 123
+        },
+        'auto_quote': True,
+    }, {
         'raw': 'myfunc("test", 123,value=123,name=\'x"xx\')',
         'fname': 'myfunc',
         'args': ('test', 123),
@@ -322,9 +331,11 @@ def test_parse_func_str():
     for t in test_data:
         if t.get('raises'):
             with pytest.raises(ValueError):
-                pyaltt2.lp.parse_func_str(t['raw'])
+                pyaltt2.lp.parse_func_str(t['raw'],
+                                          auto_quote=t.get('auto_quote'))
         else:
-            fname, args, kwargs = pyaltt2.lp.parse_func_str(t['raw'])
+            fname, args, kwargs = pyaltt2.lp.parse_func_str(
+                t['raw'], auto_quote=t.get('auto_quote'))
             assert t['fname'] == fname
             assert len(t.get('args', ())) == len(args)
             assert len(t.get('kwargs', {})) == len(kwargs)
