@@ -23,28 +23,41 @@ from .network import parse_host_port
 
 from types import SimpleNamespace
 
+DEFAULT_LOG_GET = 100
+MAX_LOG_GET = 10000
+
+CLEAN_INTERVAL = 60
+
 _exceptions = []
 
+_log_records = []
+
 _exception_log_lock = threading.RLock()
+_log_record_lock = threading.RLock()
+
+logger = logging.getLogger('pyaltt2:logs')
 
 config = SimpleNamespace(
+        name='',
+        host=platform.node(),
         log_file=None,
         log_stdout=2,
         syslog=None,
         level=20,
-        tracebacks=False, # log exception tracebacks
-        ignore=None, # ignore symbol
-        stdout_ignore=True, # use ignore symbol for stdout
+        tracebacks=False,
+        ignore=None,
+        ignore_mods = [],
+        stdout_ignore=True,
         keep_logmem=0,
-        keep_exceptions=0, # keep number of exceptions
-        colorize=True, # colorize STDOUT records if possible
+        keep_exceptions=0,
+        colorize=True,
         formatter = logging.Formatter('%(asctime)s ' + platform.node() + \
             ' %(levelname)s f:%(filename)s mod:%(module)s fn:%(funcName)s ' + \
             'l:%(lineno)d th:%(threadName)s :: %(message)s'),
         syslog_formatter = None
         )
 
-__data = SimpleNamespace(logger=None)
+__data = SimpleNamespace(logger=None, cleaner=None)
 
 neotermcolor.set_style('logger:10', color='grey', attrs='bold')
 neotermcolor.set_style('logger:20')
@@ -55,12 +68,99 @@ neotermcolor.set_style('logger:50', color='red', attrs='bold')
 neotermcolor.set_style('logger:exception', color='red')
 
 
+def append(record=None, rd=None, **kwargs):
+    """
+    Append log record to memory cache
+
+    Args:
+        recod: log record, or
+        rd: log record in dict format
+        **kwargs: passed to handle_append as-is
+    """
+    if record:
+        r = {
+            't': record.created,
+            'msg': record.getMessage(),
+            'l': record.levelno,
+            'th': record.threadName,
+            'mod': record.module,
+            'h': config.host,
+            'p': config.name
+        }
+    elif rd:
+        r = rd
+    else:
+        return
+    if r['msg'] and (not config.ignore or r['msg'][0] != config.ignore) and \
+            r['mod'] not in config.ignore_mods:
+        with _log_record_lock:
+            _log_records.append(r)
+        handle_append(r, **kwargs)
+
+
+def handle_append(rd, **kwargs):
+    """
+    Called after record is appended
+
+    Args:
+        rd: log record in dict format
+        **kwargs: got from append as-is
+    """
+
+
+def get(level=0, t=0, n=None):
+    """
+    Get recent log records
+
+    Args:
+        level: minimal log level
+        t: get entries for the recent t seconds
+        n: max number of log records (default: 100)
+    """
+    lr = []
+    if n is None: n = DEFAULT_LOG_GET
+    if n > MAX_LOG_GET: n = MAX_LOG_GET
+    t = time.time() - t if t else 0
+    ll = 0 if level is None else level
+    with _log_record_lock:
+        recs = reversed(_log_records)
+    for r in recs:
+        if r['t'] > t and r['l'] >= ll:
+            lr.append(r)
+            if len(lr) >= n:
+                break
+    return list(reversed(lr))
+
+
+async def clean(**kwargs):
+    """
+    Clean obsolete log records from memory
+    """
+    logger.debug('Cleaning logs')
+    with _log_record_lock:
+        recs = _log_records.copy()
+    for l in recs:
+        if time.time() - l['t'] > config.keep_logmem:
+            with _log_record_lock:
+                try:
+                    _log_records.remove(l)
+                except:
+                    log_traceback()
+
+
+class MemoryLogHandler(logging.Handler):
+
+    def emit(self, record):
+        append(record)
+
+
 class StdoutHandler(logging.StreamHandler):
 
     def emit(self, record):
         if not config.stdout_ignore or \
-                config.ignore is None or \
-                not record.getMessage().startswith(config.ignore):
+                ((config.ignore is None or \
+                    not record.getMessage().startswith(config.ignore)) and \
+                    record.module not in config.ignore_mods):
             super().emit(record)
 
     def format(self, record):
@@ -125,12 +225,15 @@ def init(**kwargs):
     Initialize logger
 
     Args:
+        name: software product name
+        host: custom host name
         log_file: file to log to
         log_stdout: 0 - do not log, 1 - log, 2 - log auto (if no more log hdlrs)
         syslog: True for /dev/log, socket path or host[:port]
         level: log level (default: 20)
         tracebacks: log tracebacks (default: False)
         ignore: use "ignore" symbol - memory hdlr ignores records starting with
+        ignore_mods: list of modules to ignore
         stdout_ignore: use "ignore" symbol in stdout logger as well
         keep_logmem: keep log records in memory for the specified time (seconds)
         keep_exceptions: keep number of recent exceptions
@@ -151,10 +254,12 @@ def init(**kwargs):
     has_handler = False
     if config.log_file:
         has_handler = True
-        file_handler = logging.handlers.WatchedFileHandler(config.log_file)
-        file_handler.setFormatter(config.formatter)
-        __data.logger.addHandler(file_handler)
-    # TODO: memory handler
+        handler = logging.handlers.WatchedFileHandler(config.log_file)
+        handler.setFormatter(config.formatter)
+        __data.logger.addHandler(handler)
+    if config.keep_logmem:
+        handler = MemoryLogHandler()
+        __data.logger.addHandler(handler)
     if config.syslog:
         has_handler = True
         if config.syslog is True:
@@ -170,16 +275,40 @@ def init(**kwargs):
                     config.syslog))
                 syslog_addr = None
         if syslog_addr:
-            syslog_handler = logging.handlers.SysLogHandler(address=syslog_addr)
-            syslog_handler.setFormatter(config.syslog_formatter if config.
-                                        syslog_formatter else config.formatter)
-            __data.logger.addHandler(syslog_handler)
+            handler = logging.handlers.SysLogHandler(address=syslog_addr)
+            handler.setFormatter(config.syslog_formatter if config.
+                                 syslog_formatter else config.formatter)
+            __data.logger.addHandler(handler)
     if (not has_handler and config.log_stdout == 2) or \
             config.log_stdout is True or config.log_stdout == 1:
         has_handler = True
-        stdout_handler = StdoutHandler()
-        stdout_handler.setFormatter(config.formatter)
-        __data.logger.addHandler(stdout_handler)
+        handler = StdoutHandler()
+        handler.setFormatter(config.formatter)
+        __data.logger.addHandler(handler)
     if not has_handler:
         # mute all logs
         __data.logger.addHandler(DummyHandler())
+
+
+def start(loop=None):
+    """
+    Start log cleaner
+
+    Requires atasker module, task supervisor must be started before
+
+    Args:
+        loop: atasker async loop to execute cleaner worker in
+    """
+    import atasker
+    __data.cleaner = atasker.BackgroundIntervalWorker(interval=CLEAN_INTERVAL,
+                                                      loop=loop)
+    __data.cleaner.run = clean
+    __data.cleaner.start()
+
+
+def stop():
+    """
+    Optional method top stop log cleaner
+    """
+    if __data.cleaner:
+        __data.cleaner.stop()
