@@ -302,7 +302,7 @@ def start(loop=None):
         loop: atasker async loop to execute cleaner worker in
     """
     import atasker
-    __data.cleaner = atasker.BackgroundIntervalWorker(interval=CLEAN_INTERVAL,
+    __data.cleaner = atasker.BackgroundIntervalWorker(delay=CLEAN_INTERVAL,
                                                       loop=loop)
     __data.cleaner.run = clean
     __data.cleaner.start()
