@@ -314,7 +314,7 @@ def start(loop=None):
 
 def stop():
     """
-    Optional method top stop log cleaner
+    Optional method to stop log cleaner
     """
     if __data.cleaner:
         __data.cleaner.stop()
