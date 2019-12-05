@@ -18,6 +18,7 @@ import platform
 import neotermcolor
 import threading
 import time
+import datetime
 
 from .network import parse_host_port
 
@@ -195,7 +196,10 @@ def log_traceback(display=False, use_ignore=False, force=False):
         print(neotermcolor.colored(e_msg, style='logger:exception'))
     if config.keep_exceptions:
         with _exception_log_lock:
-            e = {'t': time.strftime('%Y-%m-%d %H:%M:%S,%f %z'), 'e': e_msg}
+            e = {
+                't': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f'),
+                'e': e_msg
+            }
             _exceptions.append(e)
             if len(_exceptions) > config.keep_exceptions:
                 del _exceptions[0]
