@@ -192,7 +192,7 @@ def log_traceback(display=False, use_ignore=False, force=False):
         pfx = config.ignore if use_ignore and config.ignore else ''
         logging.error(pfx + e_msg)
     elif display:
-        print(colored(e_msg, style='logger:exception'))
+        print(neotermcolor.colored(e_msg, style='logger:exception'))
     if config.keep_exceptions:
         with _exception_log_lock:
             e = {'t': time.strftime('%Y-%m-%d %H:%M:%S,%f %z'), 'e': e_msg}
