@@ -135,6 +135,8 @@ def get(level=0, t=0, n=None):
 async def clean(**kwargs):
     """
     Clean obsolete log records from memory
+
+    Usually executed from log cleaner worker (see "start")
     """
     logger.debug('Cleaning logs')
     with _log_record_lock:
