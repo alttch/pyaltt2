@@ -5,7 +5,7 @@ function_wrong_symbols = re.compile(r"[\ \"\'\:;_\/<>{}[\]~`]")
 def parse_func_str(val, auto_quote=True):
     """
     Parse value as function string
-    e.g. myfunc(123, name="test')
+    e.g. myfunc(123, name="test")
     Args:
         val: value to parse
         auto_quote: quotes wrapper

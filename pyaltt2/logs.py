@@ -18,6 +18,7 @@ import platform
 import neotermcolor
 import threading
 import time
+import datetime
 
 from .network import parse_host_port
 
@@ -192,10 +193,13 @@ def log_traceback(display=False, use_ignore=False, force=False):
         pfx = config.ignore if use_ignore and config.ignore else ''
         logging.error(pfx + e_msg)
     elif display:
-        print(colored(e_msg, style='logger:exception'))
+        print(neotermcolor.colored(e_msg, style='logger:exception'))
     if config.keep_exceptions:
         with _exception_log_lock:
-            e = {'t': time.strftime('%Y-%m-%d %H:%M:%S,%f %z'), 'e': e_msg}
+            e = {
+                't': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f'),
+                'e': e_msg
+            }
             _exceptions.append(e)
             if len(_exceptions) > config.keep_exceptions:
                 del _exceptions[0]
@@ -302,15 +306,15 @@ def start(loop=None):
         loop: atasker async loop to execute cleaner worker in
     """
     import atasker
-    __data.cleaner = atasker.BackgroundIntervalWorker(interval=CLEAN_INTERVAL,
-                                                      loop=loop)
+    __data.cleaner = atasker.BackgroundIntervalWorker(
+        worker_name='pyaltt2:logs:cleaner', delay=CLEAN_INTERVAL, loop=loop)
     __data.cleaner.run = clean
     __data.cleaner.start()
 
 
 def stop():
     """
-    Optional method top stop log cleaner
+    Optional method to stop log cleaner
     """
     if __data.cleaner:
         __data.cleaner.stop()
