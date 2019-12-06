@@ -307,7 +307,7 @@ def start(loop=None):
     """
     import atasker
     __data.cleaner = atasker.BackgroundIntervalWorker(
-        worker_name='pyaltt2:logs:cleaner', delay=CLEAN_INTERVAL, loop=loop)
+        name='pyaltt2:logs:cleaner', delay=CLEAN_INTERVAL, loop=loop)
     __data.cleaner.run = clean
     __data.cleaner.start()
 
