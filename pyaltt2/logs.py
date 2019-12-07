@@ -186,10 +186,15 @@ def log_traceback(display=False, use_ignore=False, force=False, e=None):
         display: display traceback instead of logging
         use_ignore: use ignore symbol for traceback string
         force: force log, even if tracebacks are disabled
-        e: exception to log (optional)
+        e: exception or exc_info to log (optional)
     """
     import traceback
-    e_msg = str(e) if e else traceback.format_exc()
+    if e is None:
+        e_msg = traceback.format_exc()
+    elif isinstance(e, tuple):
+        e_msg = ''.join(traceback.format_exception(*e))
+    else:
+        e_msg = str(e)
     if (config.tracebacks or force) and not display:
         pfx = config.ignore if use_ignore and config.ignore else ''
         logging.error(pfx + e_msg)
