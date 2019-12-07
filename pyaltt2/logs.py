@@ -178,7 +178,7 @@ class DummyHandler(logging.StreamHandler):
         pass
 
 
-def log_traceback(display=False, use_ignore=False, force=False):
+def log_traceback(display=False, use_ignore=False, force=False, e=None):
     """
     Log exception traceback
 
@@ -186,9 +186,10 @@ def log_traceback(display=False, use_ignore=False, force=False):
         display: display traceback instead of logging
         use_ignore: use ignore symbol for traceback string
         force: force log, even if tracebacks are disabled
+        e: exception to log (optional)
     """
     import traceback
-    e_msg = traceback.format_exc()
+    e_msg = str(e) if e else traceback.format_exc()
     if (config.tracebacks or force) and not display:
         pfx = config.ignore if use_ignore and config.ignore else ''
         logging.error(pfx + e_msg)
