@@ -1,5 +1,5 @@
 import re
-function_wrong_symbols = re.compile(r"[\ \"\'\:;_\/<>{}[\]~`]")
+function_wrong_symbols = re.compile(r"[\ \"\'\:;\<>{}[\]~`]")
 
 
 def parse_func_str(val, auto_quote=True):

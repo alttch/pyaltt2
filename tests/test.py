@@ -293,8 +293,8 @@ def test_parse_func_str():
         },
         'auto_quote': True,
     }, {
-        'raw': 'myfunc("test", 123,value=123,name=\'x"xx\')',
-        'fname': 'myfunc',
+        'raw': 'my_func("test", 123,value=123,name=\'x"xx\')',
+        'fname': 'my_func',
         'args': ('test', 123),
         'kwargs': {
             'name': 'x"xx',
