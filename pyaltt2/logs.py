@@ -10,7 +10,7 @@ neotermcolor styles:
 - logger:50 - critical log message
 - logger:exception - exceptions, printed to stdout (w/o logging)
 
-Keeping records in memory requires atasker library
+Keeping records in memory requires neotasker library
 """
 import logging
 import logging.handlers
@@ -306,13 +306,13 @@ def start(loop=None):
     """
     Start log cleaner
 
-    Requires atasker module, task supervisor must be started before
+    Requires neotasker module, task supervisor must be started before
 
     Args:
-        loop: atasker async loop to execute cleaner worker in
+        loop: neotasker async loop to execute cleaner worker in
     """
-    import atasker
-    __data.cleaner = atasker.BackgroundIntervalWorker(
+    import neotasker
+    __data.cleaner = neotasker.BackgroundIntervalWorker(
         name='pyaltt2:logs:cleaner', delay=CLEAN_INTERVAL, loop=loop)
     __data.cleaner.run = clean
     __data.cleaner.start()
