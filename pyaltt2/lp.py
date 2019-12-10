@@ -1,5 +1,7 @@
 import re
 function_wrong_symbols = re.compile(r"[\ \"\'\:;\<>{}[\]~`]")
+params_wrong_symbols = re.compile(r'\w*\s*\(\s*\w*\s*\)\s*')
+string_match = re.compile(r'"|\'\w*\"|\'')
 
 
 def parse_func_str(val, auto_quote=True):
@@ -31,17 +33,21 @@ def parse_func_str(val, auto_quote=True):
         if val.rsplit(')', 1)[1].strip(): raise ValueError
     except IndexError:
         raise ValueError
-    params = [v.replace(')', '') if v.endswith(')') else v for v in
-              val.split('(', 1)[1].split(',')]
+    params = [v for v in val.split('(', 1)[1].rsplit(')', 1)[0].split(',')]
     new_params = []
     if auto_quote:
         for p in params:
             new_p = p.split('=') if p.__contains__('=') else [None, p]
-            if new_p[1] and not re.match(r'"|\'\w*\"|\'', new_p[1].strip()):
-                    try:
-                        float(new_p[1])
-                    except ValueError:
-                        p = '"{}"'.format(new_p[1].strip()) if new_p[0] is None else '{}="{}"'.format(new_p[0], new_p[1].strip())
+            new_p1 = new_p[1].strip()
+            if params_wrong_symbols.match(new_p[1].strip()):
+                raise ValueError('Invalid symbols in args - {}'.format(new_p1))
+            if new_p1 and not string_match.match(new_p1):
+                try:
+                    float(new_p1)
+                except ValueError:
+                    p = '"{}"'.format(new_p[1].strip(
+                    )) if new_p[0] is None else '{}="{}"'.format(
+                        new_p[0], new_p1)
             new_params.append(p)
     else:
         new_params = params

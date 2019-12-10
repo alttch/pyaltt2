@@ -309,6 +309,12 @@ def test_parse_func_str():
             'value': 123.45
         }
     }, {
+        'raw': 'myfunctest(os.system("ls"),value=123,name="xxx")',
+        'raises': True
+    }, {
+        'raw': 'myfunctest(123,value=os.system("ls"),name="xxx")',
+        'raises': True
+    }, {
         'raw': 'myfunctest, 123,value=123,name="xxx")',
         'raises': True
     }, {
