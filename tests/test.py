@@ -213,8 +213,8 @@ test_parse_date()
 
 def test_parse_number():
     test_data = [(12345, 12345), (123.45, 123.45), ('123.45', 123.45),
-                 ('123 456.78', 123456.78), ('123 456.789', 123456.789),
-                 ('123,456,789.222', 123456789.222),
+                 (' 123 456.78', 123456.78), ('123 456.789', 123456.789),
+                 (' 123,456,789.222', 123456789.222),
                  ('123.456.789,222', 123456789.222),
                  ('123456789,22', 123456789.22)]
 
@@ -222,7 +222,7 @@ def test_parse_number():
         s = d[0]
         v = d[1]
         assert pyaltt2.converters.parse_number(s) == v
-        if isinstance(s, str): s = '-' + s
+        if isinstance(s, str): s = '-' + s.strip()
         else: s = -1 * s
         assert pyaltt2.converters.parse_number(s) == -1 * v
 

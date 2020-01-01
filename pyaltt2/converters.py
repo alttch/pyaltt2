@@ -138,6 +138,8 @@ def parse_number(val):
         return val
     if not isinstance(val, str):
         raise ValueError(val)
+    else:
+        val = val.strip()
     try:
         return float(val)
     except:
