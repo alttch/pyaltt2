@@ -158,3 +158,27 @@ def parse_number(val):
             return float(val.replace('.', '').replace(',', '.'))
     else:
         return float(val.replace(',', '.'))
+
+def mq_topic_match(topic, mask):
+    """
+    Checks if topic matches mqtt-style mask
+
+    Args:
+        topic: topic (string)
+        mask: mask to check
+
+    Returns:
+        True if matches, False if don't
+    """
+    if topic == mask:
+        return True
+    else:
+        ms = mask.split('/')
+        ts = topic.split('/')
+        lts = len(ts)
+    for i, s in enumerate(ms):
+        if s == '#':
+            return i < lts
+        elif i >= lts or (s != '+' and s != ts[i]):
+            return False
+    return i == lts - 1

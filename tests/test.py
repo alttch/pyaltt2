@@ -369,3 +369,20 @@ def test_json():
     d = pyaltt2.json.dumps(data, pretty=True)
     d2 = pyaltt2.json.dumps(data, pretty=False)
     pyaltt2.json.jprint(data)
+
+
+def test_mq_topic_match():
+    topics = [('#', 'some/test/topic', True),
+              ('some/test/topic', 'some/test', False),
+              ('some/test', 'some/test/topic', False),
+              ('some/test/topic', 'some/test/topic', True),
+              ('some/+/topic', 'some/test/topic', True),
+              ('some/+/+', 'some/test/topic', True),
+              ('some/+', 'some/test/topic', False),
+              ('some/+/#', 'some/test/topic', True),
+              ('some/#', 'some/test/topic', True),
+              ('+/+/+/#', 'some/test/topic', False),
+              ('+/+/#', 'some/test/topic', True)]
+
+    for t in topics:
+        assert pyaltt2.converters.mq_topic_match(t[1], t[0]) is t[2]
