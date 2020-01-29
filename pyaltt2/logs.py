@@ -74,7 +74,7 @@ def append(record=None, rd=None, **kwargs):
     Append log record to memory cache
 
     Args:
-        recod: log record, or
+        record: log record, or
         rd: log record in dict format
         **kwargs: passed to handle_append as-is
     """
