@@ -65,6 +65,8 @@ def manage_gunicorn_app(app,
         fname = f'{app_dir}/etc/{app}.yml'
     if not Path(fname).exists():
         fname = f'/opt/{app}/etc/{app}.yml'
+    if not Path(fname).exists():
+        fname = f'/usr/local/etc/{app}.yml'
     with open(fname) as fh:
         config = yaml.load(fh.read())[app]
     pidfile = config.get('pid-file', f'/tmp/{app}.pid')
