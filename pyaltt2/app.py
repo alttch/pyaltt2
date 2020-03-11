@@ -72,6 +72,7 @@ def manage_gunicorn_app(app,
     api_url = api_listen.replace('0.0.0.0', '127.0.0.1')
     start_failed_after = config.get('start-failed-after', 10)
     force_stop_after = config.get('force-stop-after', 10)
+    launch_debug = config.get('launch-debug')
 
     def get_app_pid():
         if Path(pidfile).exists():
@@ -125,19 +126,25 @@ def manage_gunicorn_app(app,
         else:
             return False
 
-    def start_server():
+    def start_server(launch=False):
         pid = get_app_pid()
         if pid and get_app_status(pid):
             print(f'{name} is already running')
         else:
-            printfl(f'Starting {name}...', end='')
-            code = os.system('{} -D --pid {} -b {} {} {}'.format(
-                config.get('gunicorn', 'gunicorn3'), pidfile, api_listen,
-                config.get('extra-gunicorn-options', ''), app_class))
+            if not launch: printfl(f'Starting {name}...', end='')
+            xopts = config.get('extra-gunicorn-options', '')
+            if xopts and launch:
+                import re
+                xopts = re.sub(r'--log-file .* ', '', xopts + ' ')
+            code = os.system('{} {} --pid {} -b {} {} {} {}'.format(
+                config.get('gunicorn', 'gunicorn3'), '' if launch else '',
+                pidfile, api_listen, xopts,
+                '--log-level DEBUG' if launch and launch_debug else '',
+                app_class))
             if code:
-                print(f'FAILED ({code})')
+                if not launch: print(f'FAILED ({code})')
                 return False
-            else:
+            elif not launch:
                 c = 0
                 while not Path(pidfile).exists() or not health_check():
                     c += 1
@@ -148,6 +155,8 @@ def manage_gunicorn_app(app,
                         return False
                 print('started')
                 return True
+            else:
+                return True
 
     def restart_server():
         if stop_server():
@@ -156,6 +165,8 @@ def manage_gunicorn_app(app,
 
     if a.command == 'start':
         sys.exit(0 if start_server() else 1)
+    if a.command == 'launch':
+        sys.exit(0 if start_server(launch=True) else 1)
     elif a.command == 'stop':
         stop_server()
         sys.exit(0)
