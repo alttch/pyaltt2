@@ -139,8 +139,8 @@ def manage_gunicorn_app(app,
             xopts = config.get('extra-gunicorn-options', '')
             if xopts and launch:
                 import re
-                xopts = re.sub(r'--log-file .* ', '', xopts + ' ')
-                xopts = f' {xopts} '.replace(' --log-syslog ', '')
+                xopts = re.sub(r'--log-file .* ', '', xopts + ' ') + ' '
+                xopts = f' {xopts} '.replace(' --log-syslog ', ' ')
             code = os.system(
                 ('{gunicorn} {daemon} -e {config_env} --pid {pidfile}'
                  ' -b {api_listen} {xopts} {debug} {app_class}').format(
