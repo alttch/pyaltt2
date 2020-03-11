@@ -196,9 +196,12 @@ def test_safe_int():
 
 def test_parse_date():
     from datetime import datetime
+    import pytz
     d = datetime.now()
     ts = d.timestamp()
-    test_data = [(d, d), (ts, d), (3001, datetime(1970, 1, 1, 0, 50, 1)),
+    test_data = [(d, d), (ts, d),
+                 (3001,
+                  datetime.fromtimestamp(3001)),
                  ('2019-11-22', datetime(2019, 11, 22))]
     for t in test_data:
         assert pyaltt2.converters.parse_date(t[0],
@@ -206,9 +209,6 @@ def test_parse_date():
     test_data = [(d, ts), (ts, ts), (3001, 3001)]
     for t in test_data:
         assert pyaltt2.converters.parse_date(t[0]) == t[1]
-
-
-test_parse_date()
 
 
 def test_parse_number():
