@@ -50,6 +50,10 @@ def manage_gunicorn_app(app,
     ap.add_argument('--config-file',
                     metavar='FILE',
                     help='alternative config file')
+    ap.add_argument('-D',
+                    '--debug',
+                    help='Force debug mode',
+                    action='store_true')
     a = ap.parse_args()
 
     if a.command == 'version':
@@ -76,7 +80,8 @@ def manage_gunicorn_app(app,
     api_url = api_listen.replace('0.0.0.0', '127.0.0.1')
     start_failed_after = config.get('start-failed-after', 10)
     force_stop_after = config.get('force-stop-after', 10)
-    launch_debug = config.get('launch-debug')
+    debug_mode = a.debug
+    launch_debug = True if debug_mode else config.get('launch-debug')
 
     def get_app_pid():
         if Path(pidfile).exists():
@@ -150,8 +155,8 @@ def manage_gunicorn_app(app,
                      pidfile=pidfile,
                      api_listen=api_listen,
                      xopts=xopts,
-                     debug='--log-level DEBUG'
-                     if launch and launch_debug else '',
+                     debug='--log-level DEBUG' if
+                     (launch and launch_debug) or debug_mode else '',
                      app_class=app_class))
             if code:
                 if not launch: print(f'FAILED ({code})')
