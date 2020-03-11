@@ -57,17 +57,19 @@ def manage_gunicorn_app(app,
                               f' {build}' if build else ''))
         sys.exit(0)
 
+    app_env_name = f'{app.upper()}_CONFIG'
+
     if a.config_file:
-        fname = a.config_file
+        config_file = a.config_file
     else:
-        fname = os.environ.get(f'{app.upper()}_CONFIG')
-    if not fname or not Path(fname).exists():
-        fname = f'{app_dir}/etc/{app}.yml'
-    if not Path(fname).exists():
-        fname = f'/opt/{app}/etc/{app}.yml'
-    if not Path(fname).exists():
-        fname = f'/usr/local/etc/{app}.yml'
-    with open(fname) as fh:
+        config_file = os.environ.get(app_env_name)
+    if not config_file or not Path(config_file).exists():
+        config_file = f'{app_dir}/etc/{app}.yml'
+    if not Path(config_file).exists():
+        config_file = f'/opt/{app}/etc/{app}.yml'
+    if not Path(config_file).exists():
+        config_file = f'/usr/local/etc/{app}.yml'
+    with open(config_file) as fh:
         config = yaml.load(fh.read())[app]
     pidfile = config.get('pid-file', f'/tmp/{app}.pid')
     api_listen = config.get('api-listen', f'0.0.0.0:{default_port}')
@@ -138,11 +140,19 @@ def manage_gunicorn_app(app,
             if xopts and launch:
                 import re
                 xopts = re.sub(r'--log-file .* ', '', xopts + ' ')
-            code = os.system('{} {} --pid {} -b {} {} {} {}'.format(
-                config.get('gunicorn', 'gunicorn3'), '' if launch else '',
-                pidfile, api_listen, xopts,
-                '--log-level DEBUG' if launch and launch_debug else '',
-                app_class))
+                xopts = f' {xopts} '.replace(' --log-syslog ', '')
+            code = os.system(
+                ('{gunicorn} {daemon} -e {config_env} --pid {pidfile}'
+                 ' -b {api_listen} {xopts} {debug} {app_class}').format(
+                     gunicorn=config.get('gunicorn', 'gunicorn3'),
+                     daemon='' if launch else '-D',
+                     config_env=f'{app_env_name}={config_file}',
+                     pidfile=pidfile,
+                     api_listen=api_listen,
+                     xopts=xopts,
+                     debug='--log-level DEBUG'
+                     if launch and launch_debug else '',
+                     app_class=app_class))
             if code:
                 if not launch: print(f'FAILED ({code})')
                 return False
