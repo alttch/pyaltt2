@@ -15,6 +15,8 @@ import yaml
 def manage_gunicorn_app(app,
                         app_dir='.',
                         name=None,
+                        version=None,
+                        build=None,
                         default_port=8081,
                         app_class=None,
                         api_uri='/',
@@ -41,12 +43,19 @@ def manage_gunicorn_app(app,
     if app_class is None:
         app_class = f'{app}.server:app'
     ap = argparse.ArgumentParser()
-    ap.add_argument('command',
-                    choices=['start', 'stop', 'restart', 'status', 'launch'])
+    cmds = ['start', 'stop', 'restart', 'status', 'launch']
+    if version:
+        cmds.append('version')
+    ap.add_argument('command', choices=cmds)
     ap.add_argument('--config-file',
                     metavar='FILE',
                     help='alternative config file')
     a = ap.parse_args()
+
+    if a.command == 'version':
+        print('{}{}{}'.format(name, f' {version}' if version else '',
+                              f' {build}' if build else ''))
+        sys.exit(0)
 
     if a.config_file:
         fname = a.config_file
