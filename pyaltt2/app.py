@@ -74,9 +74,9 @@ def manage_gunicorn_app(app,
     if not Path(config_file).exists():
         config_file = f'/usr/local/etc/{app}.yml'
     with open(config_file) as fh:
-        config = yaml.load(fh.read())[app]
+        config = yaml.load(fh.read())[app].get('gunicorn', {})
     pidfile = config.get('pid-file', f'/tmp/{app}.pid')
-    api_listen = config.get('api-listen', f'0.0.0.0:{default_port}')
+    api_listen = config.get('listen', f'0.0.0.0:{default_port}')
     api_url = api_listen.replace('0.0.0.0', '127.0.0.1')
     start_failed_after = config.get('start-failed-after', 10)
     force_stop_after = config.get('force-stop-after', 10)
@@ -141,7 +141,7 @@ def manage_gunicorn_app(app,
             print(f'{name} is already running')
         else:
             if not launch: printfl(f'Starting {name}...', end='')
-            xopts = config.get('extra-gunicorn-options', '')
+            xopts = config.get('extra-options', '')
             if xopts and launch:
                 import re
                 xopts = re.sub(r'--log-file .* ', '', xopts + ' ') + ' '
@@ -149,7 +149,7 @@ def manage_gunicorn_app(app,
             code = os.system(
                 ('{gunicorn} {daemon} -e {config_env} --pid {pidfile}'
                  ' -b {api_listen} {xopts} {debug} {app_class}').format(
-                     gunicorn=config.get('gunicorn', 'gunicorn3'),
+                     gunicorn=config.get('path', 'gunicorn'),
                      daemon='' if launch else '-D',
                      config_env=f'{app_env_name}={config_file}',
                      pidfile=pidfile,
