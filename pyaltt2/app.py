@@ -130,6 +130,7 @@ def manage_gunicorn_app(app,
                 if c > force_stop_after:
                     os.kill(pid, signal.SIGKILL)
                     print('KILLED')
+                    return True
             print('stopped')
             return True
         else:
