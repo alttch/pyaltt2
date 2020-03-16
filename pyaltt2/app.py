@@ -154,7 +154,8 @@ def manage_gunicorn_app(app,
             code = os.system(
                 ('{gunicorn} {daemon} -e {config_env} --pid {pidfile}'
                  ' -b {api_listen} {xopts} {debug} {app_class}').format(
-                     gunicorn=config.get('path', 'gunicorn'),
+                     gunicorn=os.getenv('GUNICORN',
+                                        config.get('path', 'gunicorn')),
                      daemon='' if launch else '-D',
                      config_env=f'{app_env_name}={config_file}',
                      pidfile=pidfile,
