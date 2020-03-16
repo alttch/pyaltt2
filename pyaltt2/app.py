@@ -10,6 +10,10 @@ import requests
 import time
 from pathlib import Path
 import yaml
+try:
+    yaml.warnings({'YAMLLoadWarning': False})
+except:
+    pass
 
 
 def manage_gunicorn_app(app,
