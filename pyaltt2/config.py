@@ -44,7 +44,7 @@ def config_value(env=None,
             (config is not None and config_path is not None):
         path = config_path.split('/')
         x = config
-        for p in path:
+        for p in path[:-1]:
             if p not in x and in_place:
                 x[p] = {}
             x = x.get(p, {})
