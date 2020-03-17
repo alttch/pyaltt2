@@ -34,6 +34,8 @@ def config_value(env=None,
             (default: 'r')
         in_place: replace value in config dict
         default: default value
+    Raises:
+        LookupError: if value is not found and no default value specified
     """
     value = default
     if config_path is not None and config_path.startswith('/'):
@@ -64,10 +66,39 @@ def config_value(env=None,
         raise LookupError(msg)
     elif read_file and isinstance(value, str) and (value.startswith('/') or
                                                    value.startswith('./')):
-        with open(str(value), read_file) as fh:
-            value = fh.read()
+        try:
+            with open(str(value), read_file) as fh:
+                value = fh.read()
+        except:
+            raise LookupError(f'Unable to read value from {str(value)}')
     elif to_str:
         value = str(value)
     if in_place:
         x[path[-1]] = value
     return value
+
+
+def choose_file(env=None, choices=[]):
+    """
+    Chooise existing file
+
+    Args:
+        env: if specified and set, has top priority and choices are not
+            inspected
+        choices: if env is not set or not specified, choose existing file from
+            the list
+    Raises:
+        LookupError: if file doesn't exists
+    """
+    if env and env in os.environ:
+        fname = os.path.expanduser(os.environ[env])
+        if os.path.exists(fname):
+            return fname
+        else:
+            raise LookupError(f'No such file {env} = {fname}')
+    else:
+        for c in choices:
+            if os.path.exists(c):
+                return c
+        raise LookupError('File not found (tried {}{}'.format(
+            env + (', ' if choices else '') if env else '', ', '.join(choices)))
