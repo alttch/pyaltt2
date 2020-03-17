@@ -1,3 +1,7 @@
+"""
+Extra mods required: netaddr
+"""
+
 def parse_host_port(hp, default_port=0):
     """
     Parse host/port from string
@@ -24,8 +28,6 @@ def netacl_match(ip, acl):
 
     Doesn't work with IPv6
 
-    Requires: netaddr module
-
     Args:
         ip: IP address to check
         acl: list of netadd.IPNetwork objects
@@ -45,8 +47,6 @@ def generate_netacl(source, default=[]):
     Generates IP ACL
 
     Doesn't work with IPv6
-
-    Requires: netaddr module
 
     Args:
         source: string with IP/network or iterable
