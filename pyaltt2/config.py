@@ -78,19 +78,28 @@ def config_value(env=None,
     return value
 
 
-def choose_file(env=None, choices=[]):
+def choose_file(fname=None, env=None, choices=[]):
     """
     Chooise existing file
 
+    Returned file path is user-expanded
+
     Args:
-        env: if specified and set, has top priority and choices are not
+        fname: if specified, has top priority and others are not chechked
+        env: if specified and set, has second-top priority and choices are not
             inspected
         choices: if env is not set or not specified, choose existing file from
             the list
     Raises:
         LookupError: if file doesn't exists
     """
-    if env and env in os.environ:
+    if fname:
+        fname = os.path.expanduser(fname)
+        if os.path.exists(fname):
+            return fname
+        else:
+            raise LookupError(f'No such file {fname}')
+    elif env and env in os.environ:
         fname = os.path.expanduser(os.environ[env])
         if os.path.exists(fname):
             return fname
@@ -98,7 +107,8 @@ def choose_file(env=None, choices=[]):
             raise LookupError(f'No such file {env} = {fname}')
     else:
         for c in choices:
-            if os.path.exists(c):
-                return c
+            fname = os.path.expanduser(c)
+            if os.path.exists(fname):
+                return fname
         raise LookupError('File not found (tried {}{}'.format(
             env + (', ' if choices else '') if env else '', ', '.join(choices)))

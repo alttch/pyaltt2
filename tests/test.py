@@ -46,6 +46,12 @@ def test_choose_file():
     with pytest.raises(LookupError):
         pyaltt2.config.choose_file(
             choices=['test_data/filex', 'test_data/filexx'])
+    with pytest.raises(LookupError):
+        assert pyaltt2.config.choose_file(
+            'test_data/filex', choices=['test_data/file1', 'test_data/file2'])
+    assert pyaltt2.config.choose_file(
+        'test_data/file3', choices=['test_data/file1',
+                                    'test_data/file2']) == 'test_data/file3'
 
 
 def test_config_value():
