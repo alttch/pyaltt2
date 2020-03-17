@@ -24,6 +24,8 @@ def netacl_match(ip, acl):
 
     Doesn't work with IPv6
 
+    Requires: netaddr module
+
     Args:
         ip: IP address to check
         acl: list of netadd.IPNetwork objects
@@ -36,3 +38,25 @@ def netacl_match(ip, acl):
     for a in acl:
         if ipa in a: return True
     return False
+
+
+def generate_netacl(source, default=[]):
+    """
+    Generates IP ACL
+
+    Doesn't work with IPv6
+
+    Requires: netaddr module
+
+    Args:
+        source: string with IP/network or iterable
+        default: returns if source is empty
+    """
+    if source:
+        from netaddr import IPNetwork
+        return [
+            IPNetwork(h)
+            for h in ([source] if isinstance(source, str) else source)
+        ]
+    else:
+        return default
