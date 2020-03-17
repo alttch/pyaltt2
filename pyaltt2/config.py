@@ -1,8 +1,9 @@
 """
-Extra mods required: pyyaml
+Extra mods required: pyyaml, jsonschema
 """
 
 import yaml
+import jsonschema
 import os
 
 try:
@@ -11,12 +12,19 @@ except:
     pass
 
 
-def load_yaml(fname):
+def load_yaml(fname, schema=None):
     """
     Load config from YAML/JSON file
+
+    Args:
+        fname: file name to load
+        schema: JSON schema for validation
     """
     with open(fname) as fh:
-        return yaml.load(fh.read())
+        data = yaml.load(fh.read())
+    if schema:
+        jsonschema.validate(data, schema=schema)
+    return data
 
 
 def config_value(env=None,

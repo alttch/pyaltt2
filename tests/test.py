@@ -23,6 +23,50 @@ def test_load_config():
     config = pyaltt2.config.load_yaml('test_data/config.yml')
     assert config['data']['test'] == 'value1'
     assert config['data']['test2'] == 123
+    SCHEMA = {
+        'type': 'object',
+        'properties': {
+            'data': {
+                'type': 'object',
+                'properties': {
+                    'test': {
+                        'type': 'string'
+                    },
+                    'test2': {
+                        'type': 'integer',
+                        'minimum': 1
+                    }
+                },
+                'additionalProperties': False,
+                'required': ['test', 'test2']
+            }
+        }
+    }
+    config = pyaltt2.config.load_yaml('test_data/config.yml', schema=SCHEMA)
+    assert config['data']['test'] == 'value1'
+    assert config['data']['test2'] == 123
+    SCHEMA = {
+        'type': 'object',
+        'properties': {
+            'data': {
+                'type': 'object',
+                'properties': {
+                    'test': {
+                        'type': 'string'
+                    },
+                    'test2': {
+                        'type': 'integer',
+                        'minimum': 1
+                    }
+                },
+                'additionalProperties': False,
+                'required': ['test', 'test2', 'test3']
+            }
+        }
+    }
+    from jsonschema.exceptions import ValidationError
+    with pytest.raises(ValidationError):
+        config = pyaltt2.config.load_yaml('test_data/config.yml', schema=SCHEMA)
 
 
 def test_choose_file():
