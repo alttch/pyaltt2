@@ -9,11 +9,7 @@ import argparse
 import requests
 import time
 from pathlib import Path
-import yaml
-try:
-    yaml.warnings({'YAMLLoadWarning': False})
-except:
-    pass
+from .config import choose_file, load_yaml
 
 
 def manage_gunicorn_app(app,
@@ -67,18 +63,14 @@ def manage_gunicorn_app(app,
 
     app_env_name = f'{app.upper()}_CONFIG'
 
-    if a.config_file:
-        config_file = a.config_file
-    else:
-        config_file = os.environ.get(app_env_name)
-    if not config_file or not Path(config_file).exists():
-        config_file = f'{app_dir}/etc/{app}.yml'
-    if not Path(config_file).exists():
-        config_file = f'/opt/{app}/etc/{app}.yml'
-    if not Path(config_file).exists():
-        config_file = f'/usr/local/etc/{app}.yml'
-    with open(config_file) as fh:
-        config = yaml.load(fh.read())[app].get('gunicorn', {})
+    config = load_yaml(
+        choose_file(a.config_file,
+                    env=app_env_name,
+                    choices=[
+                        f'{app_dir}/etc/{app}.yml', f'/opt/{app}/etc/{app}.yml',
+                        f'/usr/local/etc/{app}.yml'
+                    ]))[app].get('gunicorn', {})
+
     pidfile = config.get('pid-file', f'/tmp/{app}.pid')
     api_listen = config.get('listen', f'0.0.0.0:{default_port}')
     api_url = api_listen.replace('0.0.0.0', '127.0.0.1')
