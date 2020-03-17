@@ -2,6 +2,7 @@
 
 from pathlib import Path
 import sys
+import os
 import pytest
 import logging
 
@@ -13,8 +14,83 @@ import pyaltt2.network
 import pyaltt2.converters
 import pyaltt2.lp
 import pyaltt2.json
+import pyaltt2.config
 
 from types import SimpleNamespace
+
+
+def test_load_config():
+    config = pyaltt2.config.load_yaml('test_data/config.yml')
+    assert config['data']['test'] == 'value1'
+    assert config['data']['test2'] == 123
+
+
+def test_choose_file():
+    os.environ['TEST_FILE'] = 'test_data/file1'
+    os.environ['TEST_FILE_NF'] = 'test_data/filex'
+    assert pyaltt2.config.choose_file(
+        env='TEST_FILE', choices=['test_data/file2',
+                                  'test_data/filex']) == 'test_data/file1'
+    with pytest.raises(LookupError):
+        pyaltt2.config.choose_file(
+            env='TEST_FILE_NF', choices=['test_data/file2', 'test_data/filex'])
+    with pytest.raises(LookupError):
+        pyaltt2.config.choose_file(
+            env='TEST_FILE_NFX',
+            choices=['test_data/filexx', 'test_data/filex'])
+    assert pyaltt2.config.choose_file(
+        env='TEST_FILE_NFX', choices=['test_data/filexx',
+                                      'test_data/file2']) == 'test_data/file2'
+    assert pyaltt2.config.choose_file(
+        choices=['test_data/file1', 'test_data/file2']) == 'test_data/file1'
+    with pytest.raises(LookupError):
+        pyaltt2.config.choose_file(
+            choices=['test_data/filex', 'test_data/filexx'])
+
+
+def test_config_value():
+    config = {'somedata': {'somekey': 123}}
+    assert pyaltt2.config.config_value(config=config,
+                                       config_path='/somedata/somekey') == 123
+    assert pyaltt2.config.config_value(config=config,
+                                       config_path='/somedata/somekey',
+                                       to_str=True) == '123'
+    with pytest.raises(LookupError):
+        pyaltt2.config.config_value(config=config,
+                                    config_path='/somedata/somekey2')
+    os.environ['TEST_VALUE'] = '456'
+    os.environ['TEST_VALUE_F'] = './test_data/file1'
+    os.environ['TEST_VALUE_NF'] = './test_data/filex'
+    assert pyaltt2.config.config_value(env='TEST_VALUE2',
+                                       config=config,
+                                       config_path='/somedata/somekey') == 123
+    assert pyaltt2.config.config_value(env='TEST_VALUE',
+                                       config=config,
+                                       config_path='/somedata/somekey') == '456'
+    assert pyaltt2.config.config_value(env='TEST_VALUE2',
+                                       config=config,
+                                       config_path='/somedata/somekey2',
+                                       default='xxx') == 'xxx'
+    assert pyaltt2.config.config_value(env='TEST_VALUE_F',
+                                       config=config,
+                                       config_path='/somedata/somekey2',
+                                       default='xxx') == '1'
+    with pytest.raises(LookupError):
+        pyaltt2.config.config_value(env='TEST_VALUE_NF',
+                                    config=config,
+                                    config_path='/somedata/somekey2',
+                                    default='xxx')
+    assert pyaltt2.config.config_value(env='TEST_VALUE_F',
+                                       read_file=None,
+                                       config=config,
+                                       config_path='/somedata/somekey2',
+                                       default='xxx') == './test_data/file1'
+    pyaltt2.config.config_value(env='TEST_VALUE_F',
+                                config=config,
+                                in_place=True,
+                                config_path='/somedata/somekey2',
+                                default='xxx')
+    assert config['somedata']['somekey2'] == '1'
 
 
 def test_crypto_gen_random_str():
@@ -160,15 +236,39 @@ def test_netacl_match():
     hosts = ['127.0.0.1', '10.2.3.4/32', '192.168.1.0/24', '10.55.0.0/16']
     acl = [IPNetwork(h) for h in hosts]
 
-    assert pyaltt2.network.netacl_match('127.0.0.1', acl)
-    assert pyaltt2.network.netacl_match('10.2.3.4', acl)
-    assert pyaltt2.network.netacl_match('192.168.1.4', acl)
-    assert pyaltt2.network.netacl_match('10.55.1.4', acl)
+    assert pyaltt2.network.netacl_match('127.0.0.1', acl) is True
+    assert pyaltt2.network.netacl_match('10.2.3.4', acl) is True
+    assert pyaltt2.network.netacl_match('192.168.1.4', acl) is True
+    assert pyaltt2.network.netacl_match('10.55.1.4', acl) is True
     assert pyaltt2.network.netacl_match('127.0.0.2', acl) is False
     assert pyaltt2.network.netacl_match('1.2.3.4', acl) is False
     assert pyaltt2.network.netacl_match('10.2.3.5', acl) is False
     assert pyaltt2.network.netacl_match('192.168.2.1', acl) is False
     assert pyaltt2.network.netacl_match('10.56.1.2', acl) is False
+
+
+def test_netacl_generate():
+    hosts = ['127.0.0.1', '10.2.3.4/32', '192.168.1.0/24', '10.55.0.0/16']
+
+    assert pyaltt2.network.generate_netacl([]) == []
+    assert pyaltt2.network.generate_netacl([], default=None) is None
+
+    acl = pyaltt2.network.generate_netacl(hosts)
+
+    assert pyaltt2.network.netacl_match('127.0.0.1', acl) is True
+    assert pyaltt2.network.netacl_match('10.2.3.4', acl) is True
+    assert pyaltt2.network.netacl_match('192.168.1.4', acl) is True
+    assert pyaltt2.network.netacl_match('10.55.1.4', acl) is True
+    assert pyaltt2.network.netacl_match('127.0.0.2', acl) is False
+    assert pyaltt2.network.netacl_match('1.2.3.4', acl) is False
+    assert pyaltt2.network.netacl_match('10.2.3.5', acl) is False
+    assert pyaltt2.network.netacl_match('192.168.2.1', acl) is False
+    assert pyaltt2.network.netacl_match('10.56.1.2', acl) is False
+
+    acl = pyaltt2.network.generate_netacl(hosts[0])
+    assert pyaltt2.network.netacl_match('127.0.0.1', acl) is True
+    assert pyaltt2.network.netacl_match('10.2.3.4', acl) is False
+    assert pyaltt2.network.netacl_match('127.0.0.2', acl) is False
 
 
 def test_val_to_boolean():
@@ -199,9 +299,7 @@ def test_parse_date():
     import pytz
     d = datetime.now()
     ts = d.timestamp()
-    test_data = [(d, d), (ts, d),
-                 (3001,
-                  datetime.fromtimestamp(3001)),
+    test_data = [(d, d), (ts, d), (3001, datetime.fromtimestamp(3001)),
                  ('2019-11-22', datetime(2019, 11, 22))]
     for t in test_data:
         assert pyaltt2.converters.parse_date(t[0],
