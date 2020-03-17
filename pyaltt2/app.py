@@ -1,5 +1,5 @@
 """
-Extra mods required: pyyaml, requests
+Extra mods required: pyyaml, requests, jsonschema
 """
 
 import os
@@ -10,6 +10,37 @@ import requests
 import time
 from pathlib import Path
 from .config import choose_file, load_yaml
+import jsonschema
+
+PROPERTY_MAP_SCHEMA = {
+    'type': 'object',
+    'properties': {
+        'path': {
+            'type': 'string'
+        },
+        'listen': {
+            'type': 'string'
+        },
+        'pid-file': {
+            'type': 'string'
+        },
+        'start-failed-after': {
+            'type': 'integer',
+            'minimum': 0.1
+        },
+        'force-stop-after': {
+            'type': 'integer',
+            'minimum': 0.1
+        },
+        'launch-debug': {
+            'type': 'boolean',
+        },
+        'extra-options': {
+            'type': 'string'
+        }
+    },
+    'additionalProperties': False
+}
 
 
 def manage_gunicorn_app(app,
@@ -71,6 +102,7 @@ def manage_gunicorn_app(app,
                                   f'/usr/local/etc/{app}.yml'
                               ])
     config = load_yaml(config_file)[app].get('gunicorn', {})
+    jsonschema.validate(config, schema=PROPERTY_MAP_SCHEMA)
 
     pidfile = config.get('pid-file', f'/tmp/{app}.pid')
     api_listen = config.get('listen', f'0.0.0.0:{default_port}')
