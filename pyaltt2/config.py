@@ -110,9 +110,12 @@ def choose_file(fname=None, env=None, choices=[]):
         else:
             raise LookupError(f'No such file {env} = {fname}')
     else:
+        ch = []
         for c in choices:
-            fname = os.path.expanduser(c)
+            fname = os.path.expanduser(str(c))
             if os.path.exists(fname):
                 return fname
-        raise LookupError('File not found (tried {}{}'.format(
-            env + (', ' if choices else '') if env else '', ', '.join(choices)))
+            else:
+                ch.append(fname)
+        raise LookupError('File not found (tried {}{})'.format(
+            env + (', ' if choices else '') if env else '', ', '.join(ch)))
