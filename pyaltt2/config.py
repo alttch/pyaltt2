@@ -12,7 +12,7 @@ def load_yaml(fname):
     Load config from YAML/JSON file
     """
     with open(fname) as fh:
-        return yaml.load(fname)
+        return yaml.load(fh.read())
 
 
 def config_value(env=None,
