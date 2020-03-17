@@ -36,13 +36,15 @@ def config_value(env=None,
         default: default value
     """
     value = default
+    if config_path is not None and config_path.startswith('/'):
+        config_path = config_path[1:]
     if env is not None and env in os.environ:
         value = os.environ[env]
     if value is default or in_place and \
             (config is not None and config_path is not None):
         path = config_path.split('/')
         x = config
-        for p in path[:-1] if path[0] != '' else path[1:-1]:
+        for p in path:
             if p not in x and in_place:
                 x[p] = {}
             x = x.get(p, {})
@@ -50,7 +52,16 @@ def config_value(env=None,
             if path[-1] in x:
                 value = x[path[-1]]
     if value is LookupError:
-        raise LookupError
+        if env is None and config is not None and config_path is not None:
+            msg = f'unable to find value of {config_path}'
+        elif env is not None and (config is None or config_path is None):
+            msg = f'OS variable {env} is not set'
+        elif env is not None and config is not None and config_path is not None:
+            msg = (f'unable to find value of {config_path}, '
+                   f'OS variable {env} is not set as well')
+        else:
+            msg = None
+        raise LookupError(msg)
     elif read_file and isinstance(value, str) and (value.startswith('/') or
                                                    value.startswith('./')):
         with open(str(value), read_file) as fh:
