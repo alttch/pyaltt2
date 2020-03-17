@@ -63,13 +63,14 @@ def manage_gunicorn_app(app,
 
     app_env_name = f'{app.upper()}_CONFIG'
 
-    config = load_yaml(
-        choose_file(a.config_file,
-                    env=app_env_name,
-                    choices=[
-                        f'{app_dir}/etc/{app}.yml', f'/opt/{app}/etc/{app}.yml',
-                        f'/usr/local/etc/{app}.yml'
-                    ]))[app].get('gunicorn', {})
+    config_file = choose_file(a.config_file,
+                              env=app_env_name,
+                              choices=[
+                                  f'{app_dir}/etc/{app}.yml',
+                                  f'/opt/{app}/etc/{app}.yml',
+                                  f'/usr/local/etc/{app}.yml'
+                              ])
+    config = load_yaml(config_file)[app].get('gunicorn', {})
 
     pidfile = config.get('pid-file', f'/tmp/{app}.pid')
     api_listen = config.get('listen', f'0.0.0.0:{default_port}')
