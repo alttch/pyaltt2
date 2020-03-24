@@ -7,6 +7,24 @@ from pathlib import Path
 class ResourceStorage:
     """
     Resource storage loader
+
+    Usage example:
+
+    from pyaltt.res import ResourceStorage
+    from functools import partial
+
+    rs = ResourceStorage(mod=mymod)
+
+    rsql = partial(rs.get, resource_subdir='sql', ext='sql')
+
+    rsql('object.select.data') - will load resource from (will try all
+    variations until file is found):
+
+    * sql/object.select.data.sql
+    * sql/object/select.data.sql
+    * sql/object/select/data.sql
+
+    Resource is loaded once and cached forever.
     """
 
     def __init__(self, resource_dir='.', mod=None):
@@ -40,19 +58,6 @@ class ResourceStorage:
         Get resource
 
         Loads resource from resource storage directory
-
-        Usage example:
-
-        rsql = partial(pyaltt2.res.get, resource_subdir='sql', ext='sql')
-
-        rsql('object.select.data') - will load resource from file named (will
-        try all variations until file is found):
-
-        * sql/object.select.data.sql
-        * sql/object/select.data.sql
-        * sql/object/select/data.sql
-
-        Resource is loaded once and cached forever.
 
         Args:
             resource_id: resource id. dots are replaced with "/" automatically
