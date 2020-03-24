@@ -31,6 +31,8 @@ class ResourceStorage:
         """
         init resource storage for module
 
+        If module is specified, set directory to module_dir/resources
+
         Args:
             resource_dir: resource directory or
             mod: module name
@@ -42,8 +44,8 @@ class ResourceStorage:
             if spec is None:
                 raise LookupError
             else:
-                self.resource_dir = Path(
-                    spec.origin).absolute().parent.as_posix()
+                self.resource_dir = (Path(spec.origin).absolute().parent /
+                                     'resources').as_posix()
         else:
             self.resource_dir = resource_dir
 

@@ -23,7 +23,7 @@ from functools import partial
 
 
 def test_res():
-    rs1 = pyaltt2.res.ResourceStorage('./rtest')
+    rs1 = pyaltt2.res.ResourceStorage('./rtest/resources')
     rs2 = pyaltt2.res.ResourceStorage(mod='rtest')
     with pytest.raises(LookupError):
         rs3 = pyaltt2.res.ResourceStorage(mod='rtestxxx')
