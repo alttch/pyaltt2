@@ -15,8 +15,38 @@ import pyaltt2.converters
 import pyaltt2.lp
 import pyaltt2.json
 import pyaltt2.config
+import pyaltt2.res
 
 from types import SimpleNamespace
+
+from functools import partial
+
+
+def test_res():
+    rs1 = pyaltt2.res.ResourceStorage('./rtest')
+    rs2 = pyaltt2.res.ResourceStorage(mod='rtest')
+    with pytest.raises(LookupError):
+        rs3 = pyaltt2.res.ResourceStorage(mod='rtestxxx')
+    for rs in [rs1, rs2]:
+        assert rs.get('txt.1', ext='txt') == '1'
+        assert rs.get('txt/1', ext='txt') == '1'
+        assert rs.get('txt/1.txt') == '1'
+        assert rs.get('2', resource_subdir='txt', ext='txt') == '2'
+        assert rs.get(
+            '3',
+            resource_subdir='txt',
+        ) == '3'
+        assert rs.get('txt.3') == '3'
+        assert rs.get('txt.3', mode='rb') == b'3'
+
+        rsql = partial(rs.get, resource_subdir='sql', ext='sql')
+
+        assert rsql('select.select.something').strip() == 'SELECT'
+        assert rsql('insert.insert.something').strip() == 'INSERT'
+        assert rsql('update.update.something').strip() == 'UPDATE'
+        with pytest.raises(LookupError):
+            assert rsql('delete.update.something').strip() == 'UPDATE'
+        assert rsql('delete.update.something', default='XXX').strip() == 'XXX'
 
 
 def test_load_config():
