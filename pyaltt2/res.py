@@ -15,9 +15,9 @@ class ResourceStorage:
 
     rs = ResourceStorage(mod=mymod)
 
-    rsql = partial(rs.get, resource_subdir='sql', ext='sql')
+    rq = partial(rs.get, resource_subdir='sql', ext='sql')
 
-    rsql('object.select.data') - will load resource from (will try all
+    rq('object.select.data') - will load resource from (will try all
     variations until file is found):
 
     * sql/object.select.data.sql
