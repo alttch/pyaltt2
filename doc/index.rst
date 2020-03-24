@@ -11,4 +11,5 @@ Altertech common Python functions library
    locker
    logs
    lp
+   res
    network
