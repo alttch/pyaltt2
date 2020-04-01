@@ -7,6 +7,7 @@ Altertech common Python functions library
    config
    converters
    crypto
+   db
    json
    locker
    logs
