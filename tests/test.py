@@ -16,11 +16,24 @@ import pyaltt2.lp
 import pyaltt2.json
 import pyaltt2.config
 import pyaltt2.res
+import pyaltt2.db
 
 from types import SimpleNamespace
 
 from functools import partial
 
+def test_db():
+    try:
+        try:
+            os.unlink('/tmp/pyaltt2-test.db')
+        except FileNotFoundError:
+            pass
+        pyaltt2.db.create_engine('/tmp/pyaltt2-test.db')
+        pyaltt2.db.get_db().execute("CREATE TABLE t1 (id INTEGER)")
+        pyaltt2.db.get_db().execute("INSERT INTO t1 VALUES (2)")
+        pyaltt2.db.get_db().execute("INSERT INTO t1 VALUES (3)")
+    finally:
+        os.unlink('/tmp/pyaltt2-test.db')
 
 def test_res():
     rs1 = pyaltt2.res.ResourceStorage('./rtest/resources')

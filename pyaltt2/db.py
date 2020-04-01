@@ -63,3 +63,4 @@ def create_engine(dbconn, **kwargs):
         _d.db = sa.create_engine(dbconn, listeners=[_ForeignKeysListener()])
     else:
         _d.db = sa.create_engine(dbconn, **kwargs)
+    return _d.db
