@@ -12,6 +12,15 @@ g = threading.local()
 _d = SimpleNamespace()
 
 
+def get_list(*args, **kwargs):
+    """
+    get database result as list of dicts
+
+    arguments are passed as-is to SQLAlchemy execute function
+    """
+    return [dict(row) for row in get_db().execute(*args, **kwargs).fetchall()]
+
+
 def get_db():
     """
     Get thread-safe db connection
