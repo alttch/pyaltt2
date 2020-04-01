@@ -10,16 +10,7 @@ try:
 except:
     import json
 
-
-def loads(raw, **kwargs):
-    """
-    Load JSON
-
-    Args:
-        raw: raw data to parse
-        **kwargs: sent to json.loads() as-is
-    """
-    return json.loads(raw)
+loads = json.loads
 
 
 def dumps(data, pretty=False, unpicklable=False, pickle_opts={}, **kwargs):
