@@ -28,10 +28,10 @@ def test_db():
             os.unlink('/tmp/pyaltt2-test.db')
         except FileNotFoundError:
             pass
-        pyaltt2.db.create_engine('/tmp/pyaltt2-test.db')
-        pyaltt2.db.get_db().execute("CREATE TABLE t1 (id INTEGER)")
-        pyaltt2.db.get_db().execute("INSERT INTO t1 VALUES (2)")
-        pyaltt2.db.get_db().execute("INSERT INTO t1 VALUES (3)")
+        db = pyaltt2.db.Database('/tmp/pyaltt2-test.db')
+        db.execute("CREATE TABLE t1 (id INTEGER)")
+        db.execute("INSERT INTO t1 VALUES (2)")
+        db.execute("INSERT INTO t1 VALUES (3)")
     finally:
         os.unlink('/tmp/pyaltt2-test.db')
 
