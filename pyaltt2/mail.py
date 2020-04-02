@@ -2,9 +2,9 @@ from pyaltt2.network import parse_host_port
 import smtplib
 
 
-class Mail:
+class SMTP:
     """
-    E-Mail helper
+    SMTP sender
     """
 
     def __init__(self,
