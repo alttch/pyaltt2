@@ -1,9 +1,7 @@
 """
 Extra mods required: pyyaml, jsonschema
 """
-
 import yaml
-import jsonschema
 import os
 
 try:
@@ -20,6 +18,7 @@ def load_yaml(fname, schema=None):
         fname: file name to load
         schema: JSON schema for validation
     """
+    import jsonschema
     with open(fname) as fh:
         data = yaml.load(fh.read())
     if schema:
