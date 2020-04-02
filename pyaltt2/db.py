@@ -1,9 +1,10 @@
 """
 Thread-safe SQLAlchemy wrapper
+
+Extra mods required: sqlalchemy
 """
 import threading
 import os
-import sqlalchemy as sa
 from types import SimpleNamespace
 
 db_lock = threading.RLock()
@@ -48,6 +49,7 @@ def create_engine(dbconn, **kwargs):
         allowed)
         kwargs: additional engine options (ignored for SQLite)
     """
+    import sqlalchemy as sa
 
     class _ForeignKeysListener(sa.interfaces.PoolListener):
 
