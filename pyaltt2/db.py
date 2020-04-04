@@ -10,7 +10,7 @@ from types import SimpleNamespace
 
 class Database:
 
-    def __init__(self, dbconn, rq_func=None, **kwargs):
+    def __init__(self, dbconn=None, rq_func=None, **kwargs):
         """
         Args:
             dbconn - database connection string (for SQLite - file name is
@@ -18,6 +18,7 @@ class Database:
             rq_func: resource loader function (for query method)
             kwargs: additional engine options (ignored for SQLite)
         """
+        if not dbconn: return
         import sqlalchemy as sa
 
         class _ForeignKeysListener(sa.interfaces.PoolListener):
@@ -38,6 +39,17 @@ class Database:
                                        listeners=[_ForeignKeysListener()])
         else:
             self.db = sa.create_engine(dbconn, **kwargs)
+
+    def clone(self):
+        """
+        Clone database object
+        """
+        o = Database()
+        o.db = self.db
+        o.db_lock = self.db_lock
+        o.g = self.g
+        o.rq_func = self.rq_func
+        return o
 
     def get_list(self, *args, **kwargs):
         """
