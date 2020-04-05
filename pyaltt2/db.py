@@ -108,11 +108,12 @@ class Database:
 
 
 class KVStorage:
+    """
+    Simple key-value database storage
+    """
 
     def __init__(self, db, table_name='kv'):
         """
-        Simple key-value database storage
-
         Args:
             db: pyaltt2.db.Database
             table_name: storage table name (default: kv)
