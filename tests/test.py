@@ -5,6 +5,7 @@ import sys
 import os
 import pytest
 import logging
+import time
 
 sys.path.insert(0, Path().absolute().parent.as_posix())
 
@@ -29,9 +30,26 @@ def test_db():
         except FileNotFoundError:
             pass
         db = pyaltt2.db.Database('/tmp/pyaltt2-test.db')
+        for t in ['t1', 'kv']:
+            try: db.execute(f'DROP TABLE {t}')
+            except: pass
         db.execute("CREATE TABLE t1 (id INTEGER)")
         db.execute("INSERT INTO t1 VALUES (2)")
         db.execute("INSERT INTO t1 VALUES (3)")
+        kv = pyaltt2.db.KVStorage(db = db)
+        kv.put('test', 123)
+        assert kv.get('test') == 123
+        assert kv.get('test', delete=True) == 123
+        with pytest.raises(LookupError):
+            kv.get('test')
+        key = kv.put(value={ 'a': 2, 'b': 3}, expires=0)
+        assert kv.get(key)['a'] == 2
+        kv.put(key, { 'a': 5, 'b': 8}, expires=0)
+        assert kv.get(key)['a'] == 5
+        assert kv.get(key)['b'] == 8
+        kv.cleanup()
+        with pytest.raises(LookupError):
+            kv.get(key)
     finally:
         os.unlink('/tmp/pyaltt2-test.db')
 

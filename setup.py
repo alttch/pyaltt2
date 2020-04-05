@@ -14,6 +14,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/alttch/pyaltt2',
+    include_package_data=True,
     packages=setuptools.find_packages(),
     license='MIT',
     install_requires=[],

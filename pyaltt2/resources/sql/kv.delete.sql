@@ -1,0 +1,3 @@
+DELETE
+FROM {}
+WHERE id=:id
