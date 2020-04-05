@@ -1,6 +1,4 @@
 """
-Thread-safe SQLAlchemy wrapper
-
 Extra mods required: sqlalchemy
 """
 import threading
@@ -9,6 +7,9 @@ from types import SimpleNamespace
 
 
 class Database:
+    """
+    Database wrapper for SQLAlchemy
+    """
 
     def __init__(self, dbconn=None, rq_func=None, **kwargs):
         """
