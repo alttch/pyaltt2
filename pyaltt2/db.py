@@ -14,8 +14,8 @@ class Database:
     def __init__(self, dbconn=None, rq_func=None, **kwargs):
         """
         Args:
-            dbconn - database connection string (for SQLite - file name is
-            allowed)
+            dbconn: database connection string (for SQLite - only file name is
+                required)
             rq_func: resource loader function (for query method)
             kwargs: additional engine options (ignored for SQLite)
         """
