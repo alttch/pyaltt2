@@ -33,7 +33,7 @@ class SMTP:
 
     def send(self, sender, rcpt, body):
         """
-        Send email
+        Send raw email
 
         Args:
             sender: E-Mail sender
@@ -48,3 +48,29 @@ class SMTP:
             sm.login(self.login, self.password)
         sm.sendmail(sender, rcpt, body)
         sm.close()
+
+    def sendmail(self, sender, rcpt, subject='', text='', html=None):
+        """
+        Send text/html email
+
+        Args:
+            sender: E-Mail sender
+            rcpt: E-Mail recipient
+            subject: E-Mail subject
+            text: message text in plain
+            html: message text in HTML
+        """
+        from email.mime.multipart import MIMEMultipart
+        from email.mime.text import MIMEText
+        if html:
+            m = MIMEMultipart('alternative')
+            part_text = MIMEText(text, 'plain')
+            part_html = MIMEText(html, 'html')
+            m.attach(part_text)
+            m.attach(part_html)
+        else:
+            m = MIMEText(text)
+        m['Subject'] = subject
+        m['From'] = sender
+        m['To'] = rcpt
+        self.send(sender, rcpt, m.as_string())
