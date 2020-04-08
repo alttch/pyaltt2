@@ -78,7 +78,7 @@ class Database:
         return result
 
     def _format_list(self, result, json_fields=[]):
-        if self.parse_db_json:
+        if self.parse_db_json and json_fields:
             for row in result:
                 for f in json_fields:
                     row[f] = json.loads(row[f])
