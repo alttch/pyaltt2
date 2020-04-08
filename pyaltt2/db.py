@@ -69,27 +69,50 @@ class Database:
         self.__repr__ = self.db.__repr__
         self.__str__ = self.db.__str__
 
+    def _format_result(self, result, json_fields=[]):
+        if result is not None:
+            result = dict(result)
+            if self.parse_db_json:
+                for f in json_fields:
+                    result[f] = json.loads(result[f])
+        return result
+
+    def _format_list(self, result, json_fields=[]):
+        if self.parse_db_json:
+            for row in result:
+                for f in json_fields:
+                    row[f] = json.loads(row[f])
+        return result
+
     def get_engine(self):
         """
         Get DB engine object
         """
         return self.db
 
-    def list(self, *args, **kwargs):
+    def list(self, *args, json_fields=[], **kwargs):
         """
         get self.execute result as list of dicts
 
-        arguments are passed as-is to SQLAlchemy execute function
+        Args:
+            json_fields: decode json fields if required
+            other: passed as-is
         """
-        return [dict(row) for row in self.execute(*args, **kwargs).fetchall()]
+        return self._format_list(
+            [dict(row) for row in self.execute(*args, **kwargs).fetchall()],
+            json_fields=json_fields)
 
-    def qlist(self, *args, **kwargs):
+    def qlist(self, *args, json_fields=[], **kwargs):
         """
         get self.query result as list of dicts
 
-        arguments are passed as-is to query function
+        Args:
+            json_fields: decode json fields if required
+            other: passed as-is
         """
-        return [dict(row) for row in self.query(*args, **kwargs).fetchall()]
+        return self._format_list(
+            [dict(row) for row in self.query(*args, **kwargs).fetchall()],
+            json_fields=json_fields)
 
     def connect(self):
         """
@@ -169,12 +192,9 @@ class Database:
         Raises:
             LookupError: if nothing found
         """
-        result = self.execute(*args, **kwargs).fetchone()
+        result = self._format_result(self.execute(*args, **kwargs).fetchone(),
+                                     json_fields=json_fields)
         if result:
-            result = dict(result)
-            if self.parse_db_json:
-                for f in json_fields:
-                    result[f] = json.loads(result[f])
             return result
         else:
             raise LookupError
@@ -188,9 +208,10 @@ class Database:
         Raises:
             LookupError: if nothing found
         """
-        result = self.query(*args, **kwargs).fetchone()
+        result = self._format_result(self.query(*args, **kwargs).fetchone(),
+                                     json_fields=json_fields)
         if result:
-            return dict(result)
+            return result
         else:
             raise LookupError
 
