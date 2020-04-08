@@ -199,7 +199,7 @@ class Database:
         else:
             raise LookupError
 
-    def qlookup(self, *args, **kwargs):
+    def qlookup(self, *args, json_fields=[], **kwargs):
         """
         Get single db row, use self.query
 
