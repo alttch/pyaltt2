@@ -106,7 +106,7 @@ class Database:
             other: passed to SQLAlchemy connection as-is
         """
         result = self.connect().execute(*args, **kwargs)
-        if cr and result.rowcount == 0:
+        if _cr and result.rowcount == 0:
             raise LookupError
         else:
             return result
