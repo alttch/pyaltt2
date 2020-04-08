@@ -39,6 +39,9 @@ def test_db():
         assert db.lookup('SELECT * FROM t1 WHERE id=2')['id'] == 2
         with pytest.raises(LookupError):
             db.lookup('SELECT * FROM t1 WHERE id=999')
+        db.execute('DELETE FROM t1 WHERE id=999')
+        with pytest.raises(LookupError):
+            db.execute('DELETE FROM t1 WHERE id=999', cr=True)
         kv = pyaltt2.db.KVStorage(db = db)
         kv.put('test', 123)
         assert kv.get('test') == 123
