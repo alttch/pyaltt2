@@ -69,6 +69,12 @@ class Database:
         self.__repr__ = self.db.__repr__
         self.__str__ = self.db.__str__
 
+    def get_engine(self):
+        """
+        Get DB engine object
+        """
+        return self.db
+
     def list(self, *args, **kwargs):
         """
         get self.execute result as list of dicts
@@ -111,7 +117,7 @@ class Database:
         else:
             return result
 
-    def query(self, q, qargs=[], qkwargs={}, *args, **kwargs):
+    def query(self, q, qargs=[], qkwargs={}, _create=False, *args, **kwargs):
         """
         Execute SQL query by resource
 
@@ -126,7 +132,29 @@ class Database:
         q = self.rq_func(q)
         if qargs or qkwargs:
             q = q.format(*qargs, **qkwargs)
+        if _create and not self.use_lastrowid:
+            q += ' RETURNING id'
         return self.execute(sql(q), *args, **kwargs)
+
+    def create(self, q, *args, **kwargs):
+        """
+        Execute (usually INSERT) query with self.execute and return row id
+
+        row id must be in "id" field
+        """
+        if not self.use_lastrowid:
+            q += ' RETURNING id'
+        result = self.execute(q, *args, **kwargs)
+        return result.lastrowid if self.use_lastrowid else result.fetchone().id
+
+    def qcreate(self, q, *args, **kwargs):
+        """
+        Execute (usually INSERT) query with self.query and return row id
+
+        row id must be in "id" field
+        """
+        result = self.query(q, _create=True, *args, **kwargs)
+        return result.lastrowid if self.use_lastrowid else result.fetchone().id
 
     def lookup(self, *args, json_fields=[], **kwargs):
         """
@@ -165,12 +193,6 @@ class Database:
             return dict(result)
         else:
             raise LookupError
-
-    def get_engine(self):
-        """
-        Get DB engine object
-        """
-        return self.db
 
 
 class KVStorage:

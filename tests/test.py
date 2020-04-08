@@ -23,6 +23,7 @@ from types import SimpleNamespace
 
 from functools import partial
 
+
 def test_db():
     try:
         try:
@@ -30,10 +31,14 @@ def test_db():
         except FileNotFoundError:
             pass
         db = pyaltt2.db.Database('/tmp/pyaltt2-test.db')
-        for t in ['t1', 'kv']:
-            try: db.execute(f'DROP TABLE {t}')
-            except: pass
+        for t in ['t1', 't2' 'kv']:
+            try:
+                db.execute(f'DROP TABLE {t}')
+            except:
+                pass
         db.execute('CREATE TABLE t1 (id INTEGER)')
+        db.execute('CREATE TABLE t2 (id INTEGER PRIMARY KEY '
+                   'AUTOINCREMENT, name varchar(10))')
         db.execute('INSERT INTO t1 VALUES (2)')
         db.execute('INSERT INTO t1 VALUES (3)')
         assert db.lookup('SELECT * FROM t1 WHERE id=2')['id'] == 2
@@ -42,15 +47,21 @@ def test_db():
         db.execute('DELETE FROM t1 WHERE id=999')
         with pytest.raises(LookupError):
             db.execute('DELETE FROM t1 WHERE id=999', _cr=True)
-        kv = pyaltt2.db.KVStorage(db = db)
+        id1 = db.create("INSERT INTO t2(name) VALUES ('test1')")
+        id2 = db.create("INSERT INTO t2(name) VALUES ('test2')")
+        assert db.lookup("SELECT * FROM t2 WHERE id=:id",
+                         id1)['name'] == 'test1'
+        assert db.lookup("SELECT * FROM t2 WHERE id=:id",
+                         id2)['name'] == 'test2'
+        kv = pyaltt2.db.KVStorage(db=db)
         kv.put('test', 123)
         assert kv.get('test') == 123
         assert kv.get('test', delete=True) == 123
         with pytest.raises(LookupError):
             kv.get('test')
-        key = kv.put(value={ 'a': 2, 'b': 3}, expires=0)
+        key = kv.put(value={'a': 2, 'b': 3}, expires=0)
         assert kv.get(key)['a'] == 2
-        kv.put(key, { 'a': 5, 'b': 8}, expires=0)
+        kv.put(key, {'a': 5, 'b': 8}, expires=0)
         assert kv.get(key)['a'] == 5
         assert kv.get(key)['b'] == 8
         kv.cleanup()
@@ -59,6 +70,7 @@ def test_db():
             kv.get(key)
     finally:
         os.unlink('/tmp/pyaltt2-test.db')
+
 
 def test_res():
     rs1 = pyaltt2.res.ResourceStorage('./rtest/resources')
