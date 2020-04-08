@@ -97,12 +97,12 @@ class Database:
                 self.g.conn = self.db.connect()
                 return self.g.conn
 
-    def execute(self, *args, cr=False, **kwargs):
+    def execute(self, *args, _cr=False, **kwargs):
         """
         Execute SQL query
 
         Args:
-            cr: check result, raise LookupError if row count is zero
+            _cr: check result, raise LookupError if row count is zero
             other: passed to SQLAlchemy connection as-is
         """
         result = self.connect().execute(*args, **kwargs)
