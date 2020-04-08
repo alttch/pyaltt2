@@ -48,6 +48,7 @@ def test_db():
         assert kv.get(key)['a'] == 5
         assert kv.get(key)['b'] == 8
         kv.cleanup()
+        db.clone()
         with pytest.raises(LookupError):
             kv.get(key)
     finally:

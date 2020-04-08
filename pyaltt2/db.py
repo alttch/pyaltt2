@@ -15,6 +15,8 @@ class Database:
     Database wrapper for SQLAlchemy
     """
 
+    _clone_params = ('db', 'db_lock', 'g', 'rq_func')
+
     def __init__(self, dbconn=None, rq_func=None, **kwargs):
         """
         Args:
@@ -45,15 +47,15 @@ class Database:
         else:
             self.db = sa.create_engine(dbconn, **kwargs)
 
-    def clone(self):
+    def clone(self, **kwargs):
         """
         Clone database object
+
+        Extra kwargs (db, db_lock, g, rq_func) are assigned to object as-is
         """
         o = Database()
-        o.db = self.db
-        o.db_lock = self.db_lock
-        o.g = self.g
-        o.rq_func = self.rq_func
+        for c in self._clone_params:
+            setattr(o, c, kwargs[c] if c in kwargs else getattr(self, c))
         return o
 
     def get_list(self, *args, **kwargs):
