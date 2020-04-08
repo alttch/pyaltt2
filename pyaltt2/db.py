@@ -68,7 +68,7 @@ class Database:
         self.__repr__ = self.db.__repr__
         self.__str__ = self.db.__str__
 
-    def get_list(self, *args, **kwargs):
+    def list(self, *args, **kwargs):
         """
         get execute result as list of dicts
 
@@ -76,7 +76,7 @@ class Database:
         """
         return [dict(row) for row in self.execute(*args, **kwargs).fetchall()]
 
-    def get_qlist(self, *args, **kwargs):
+    def qlist(self, *args, **kwargs):
         """
         get query result as list of dicts
 
