@@ -33,9 +33,12 @@ def test_db():
         for t in ['t1', 'kv']:
             try: db.execute(f'DROP TABLE {t}')
             except: pass
-        db.execute("CREATE TABLE t1 (id INTEGER)")
-        db.execute("INSERT INTO t1 VALUES (2)")
-        db.execute("INSERT INTO t1 VALUES (3)")
+        db.execute('CREATE TABLE t1 (id INTEGER)')
+        db.execute('INSERT INTO t1 VALUES (2)')
+        db.execute('INSERT INTO t1 VALUES (3)')
+        assert db.lookup('SELECT * FROM t1 WHERE id=2')['id'] == 2
+        with pytest.raises(LookupError):
+            db.lookup('SELECT * FROM t1 WHERE id=999')
         kv = pyaltt2.db.KVStorage(db = db)
         kv.put('test', 123)
         assert kv.get('test') == 123

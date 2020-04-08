@@ -70,7 +70,7 @@ class Database:
 
     def list(self, *args, **kwargs):
         """
-        get execute result as list of dicts
+        get self.execute result as list of dicts
 
         arguments are passed as-is to SQLAlchemy execute function
         """
@@ -78,7 +78,7 @@ class Database:
 
     def qlist(self, *args, **kwargs):
         """
-        get query result as list of dicts
+        get self.query result as list of dicts
 
         arguments are passed as-is to query function
         """
@@ -99,7 +99,6 @@ class Database:
     def execute(self, *args, **kwargs):
         """
         Execute SQL query
-
         """
         return self.connect().execute(*args, **kwargs)
 
@@ -119,6 +118,36 @@ class Database:
         if qargs or qkwargs:
             q = q.format(*qargs, **qkwargs)
         return self.execute(sql(q), *args, **kwargs)
+
+    def lookup(self, *args, **kwargs):
+        """
+        Get single db row, use self.execute
+
+        Returns:
+            single row as a dict
+        Raises:
+            LookupError: if nothing found
+        """
+        result = self.execute(*args, **kwargs).fetchone()
+        if result:
+            return dict(result)
+        else:
+            raise LookupError
+
+    def qlookup(self, *args, **kwargs):
+        """
+        Get single db row, use self.query
+
+        Returns:
+            single row as a dict
+        Raises:
+            LookupError: if nothing found
+        """
+        result = self.execute(*args, **kwargs).fetchone()
+        if result:
+            return dict(result)
+        else:
+            raise LookupError
 
     def get_engine(self):
         """
