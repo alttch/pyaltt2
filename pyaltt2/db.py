@@ -62,8 +62,8 @@ class Database:
 
     def _setup(self):
         self.use_lastrowid = self.db.name in ['sqlite', 'mysql']
-        self.parse_db_json = self.db.name in ['sqlite', 'mysql']
         self.use_interval = self.db.name not in ['sqlite', 'mysql']
+        self.parse_db_json = self.db.name in ['sqlite', 'mysql']
 
     def get_list(self, *args, **kwargs):
         """
