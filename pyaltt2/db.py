@@ -70,11 +70,19 @@ class Database:
 
     def get_list(self, *args, **kwargs):
         """
-        get database result as list of dicts
+        get execute result as list of dicts
 
         arguments are passed as-is to SQLAlchemy execute function
         """
         return [dict(row) for row in self.execute(*args, **kwargs).fetchall()]
+
+    def get_qlist(self, *args, **kwargs):
+        """
+        get query result as list of dicts
+
+        arguments are passed as-is to query function
+        """
+        return [dict(row) for row in self.query(*args, **kwargs).fetchall()]
 
     def connect(self):
         """
