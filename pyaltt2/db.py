@@ -7,6 +7,7 @@ import datetime
 from types import SimpleNamespace
 from pyaltt2.crypto import gen_random_str
 from pyaltt2.res import ResourceStorage
+import pyaltt2.json as json
 from functools import partial
 
 
@@ -127,9 +128,13 @@ class Database:
             q = q.format(*qargs, **qkwargs)
         return self.execute(sql(q), *args, **kwargs)
 
-    def lookup(self, *args, **kwargs):
+    def lookup(self, *args, json_fields=[], **kwargs):
         """
         Get single db row, use self.execute
+
+        Args:
+            json_fields: decode json fields if required
+            other: passed as-is
 
         Returns:
             single row as a dict
@@ -138,7 +143,11 @@ class Database:
         """
         result = self.execute(*args, **kwargs).fetchone()
         if result:
-            return dict(result)
+            result = dict(result)
+            if self.parse_db_json:
+                for f in json_fields:
+                    result[f] = json.loads(result[f])
+            return result
         else:
             raise LookupError
 
