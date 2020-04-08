@@ -46,6 +46,7 @@ class Database:
                                        listeners=[_ForeignKeysListener()])
         else:
             self.db = sa.create_engine(dbconn, **kwargs)
+        self._setup()
 
     def clone(self, **kwargs):
         """
@@ -56,7 +57,13 @@ class Database:
         o = Database()
         for c in self._clone_params:
             setattr(o, c, kwargs[c] if c in kwargs else getattr(self, c))
+        o._setup()
         return o
+
+    def _setup(self):
+        self.use_lastrowid = self.db.name in ['sqlite', 'mysql']
+        self.parse_db_json = self.db.name in ['sqlite', 'mysql']
+        self.use_interval = self.db.name not in ['sqlite', 'mysql']
 
     def get_list(self, *args, **kwargs):
         """
