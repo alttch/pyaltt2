@@ -66,8 +66,12 @@ class Database:
         self.use_interval = self.db.name not in ['sqlite', 'mysql']
         self.parse_db_json = self.db.name in ['sqlite', 'mysql']
         self.name = self.db.name
-        self.__repr__ = self.db.__repr__
-        self.__str__ = self.db.__str__
+
+    def __repr__(self):
+        return self.db.__repr__()
+
+    def __str__(self):
+        return self.db.__str__()
 
     def _format_result(self, result, json_fields=[]):
         if result is not None:
