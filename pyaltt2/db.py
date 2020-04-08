@@ -188,7 +188,7 @@ class Database:
         Raises:
             LookupError: if nothing found
         """
-        result = self.execute(*args, **kwargs).fetchone()
+        result = self.query(*args, **kwargs).fetchone()
         if result:
             return dict(result)
         else:
