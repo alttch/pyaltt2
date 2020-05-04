@@ -76,7 +76,7 @@ def safe_int(val):
         return int(val)
 
 
-def parse_date(val=None, return_timestamp=True):
+def parse_date(val=None, return_timestamp=True, ms=False):
     """
     Parse date from string or float/integer
 
@@ -88,6 +88,7 @@ def parse_date(val=None, return_timestamp=True):
     Args:
         val: value to parse
         return_timestamp: return UNIX timestamp (default) or datetime object
+        ms: parse date from milliseconds
 
     Returns:
         UNIX timestamp (float) or datetime object. If input value is None,
@@ -102,6 +103,8 @@ def parse_date(val=None, return_timestamp=True):
     else:
         try:
             val = float(val)
+            if ms:
+                val /= 1000
             if val > 3000:
                 return val if return_timestamp else \
                         datetime.datetime.fromtimestamp(val)
