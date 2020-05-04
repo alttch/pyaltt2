@@ -437,6 +437,11 @@ def test_parse_date():
     test_data = [(d, ts), (ts, ts), (3001, 3001)]
     for t in test_data:
         assert pyaltt2.converters.parse_date(t[0]) == t[1]
+    assert pyaltt2.converters.parse_date(
+        time.time(), return_timestamp=False).date() == datetime.now().date()
+    assert pyaltt2.converters.parse_date(
+        time.time() * 1000, return_timestamp=False,
+        ms=True).date() == datetime.now().date()
 
 
 def test_parse_number():
@@ -450,8 +455,10 @@ def test_parse_number():
         s = d[0]
         v = d[1]
         assert pyaltt2.converters.parse_number(s) == v
-        if isinstance(s, str): s = '-' + s.strip()
-        else: s = -1 * s
+        if isinstance(s, str):
+            s = '-' + s.strip()
+        else:
+            s = -1 * s
         assert pyaltt2.converters.parse_number(s) == -1 * v
 
 
