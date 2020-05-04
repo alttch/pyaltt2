@@ -8,7 +8,8 @@ def merge_dict(*args, add_keys=True):
     Returns:
         merged dict
     """
-    if len(args) < 1: return None
+    if len(args) < 1:
+        return None
     dct = args[0].copy()
     from collections.abc import Mapping
     for merged in args[1:]:
@@ -46,13 +47,18 @@ def val_to_boolean(val):
     Raises:
         ValueError: if value can not be converted
     """
-    if val is None: return None
-    elif isinstance(val, bool): return val
+    if val is None:
+        return None
+    elif isinstance(val, bool):
+        return val
     else:
         val = str(val)
-        if val.lower() in ['1', 't', 'true', 'yes', 'on', 'y']: return True
-        elif val.lower() in ['0', 'f', 'false', 'no', 'off', 'n']: return False
-        else: raise ValueError
+        if val.lower() in ['1', 't', 'true', 'yes', 'on', 'y']:
+            return True
+        elif val.lower() in ['0', 'f', 'false', 'no', 'off', 'n']:
+            return False
+        else:
+            raise ValueError
 
 
 def safe_int(val):
@@ -161,6 +167,7 @@ def parse_number(val):
             return float(val.replace('.', '').replace(',', '.'))
     else:
         return float(val.replace(',', '.'))
+
 
 def mq_topic_match(topic, mask):
     """
