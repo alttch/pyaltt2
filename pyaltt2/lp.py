@@ -61,9 +61,9 @@ def parse_func_str(val, auto_quote=True):
         raise ValueError('Invalid symbols in function name')
     # try parsing params with ast
     try:
-        args = 'f({})'.format(params)
+        code = 'f({})'.format(params)
         try:
-            tree = ast.parse(args)
+            tree = ast.parse(code)
         except:
             raise ValueError('Invalid syntax')
         funccall = tree.body[0].value
