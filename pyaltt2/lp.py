@@ -2,9 +2,8 @@ import re
 import ast
 from textwrap import dedent
 from functools import lru_cache
+
 function_wrong_symbols = re.compile(r"[\ \"\'\:;\<>{}[\]~`]")
-params_wrong_symbols = re.compile(r'\w*\s*\(\s*\w*\s*\)\s*')
-string_match = re.compile(r'"|\'\w*\"|\'')
 
 
 @lru_cache(maxsize=4096)
