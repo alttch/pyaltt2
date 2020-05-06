@@ -495,13 +495,29 @@ def test_parse_func_str():
         'fname': 'myfunc',
         'args': [123.45, 'test']
     }, {
-        'raw': 'myfunc("test", 123,value=123,name="xxx")',
+        'raw': 'myfunc("test", 123,value=123'
+               ',name="xxx", arr=[1,2,3], arr2=["a","b","c"])',
         'fname': 'myfunc',
         'args': ['test', 123],
         'kwargs': {
             'name': 'xxx',
-            'value': 123
+            'value': 123,
+            'arr': [1, 2, 3],
+            'arr2': ['a', 'b', 'c']
         }
+    }, {
+        'raw':
+            'myfunc("test", 123,''value=123,name="xxx", arr=[1,2,3], arr2=[a,b,c])',
+        'fname':
+            'myfunc',
+        'args': ['test', 123],
+        'kwargs': {
+            'name': 'xxx',
+            'value': 123,
+            'arr': [1, 2, 3],
+            'arr2': ['a', 'b', 'c']
+        },
+        'auto_quote': True
     }, {
         'raw': 'myfunc(\'test\', 123,value=123,name=\'xxx\')  ',
         'fname': 'myfunc',
