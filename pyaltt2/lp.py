@@ -6,8 +6,33 @@ function_wrong_symbols = re.compile(r"[\ \"\'\:;\<>{}[\]~`]")
 params_wrong_symbols = re.compile(r'\w*\s*\(\s*\w*\s*\)\s*')
 string_match = re.compile(r'"|\'\w*\"|\'')
 
+
 @lru_cache(maxsize=4096)
 def parse_func_str(val, auto_quote=True):
+    """
+    Parse function call from string
+
+    Returns:
+        tuple fn, args, kwargs
+    Raises:
+        ValueError: if string is invalid
+    """
+
+    def _invalid_arg(arg):
+        raise ValueError('Invalid argument')
+
+    def _format_arg(arg):
+        try:
+            return '{}.{}'.format(arg.value.id, arg.attr)
+        except AttributeError:
+            try:
+                return arg.value.id
+            except AttributeError:
+                try:
+                    return arg.id
+                except AttributeError:
+                    _invalid_arg(arg)
+
     val = val.strip()
     if not val or not val.endswith(')'):
         raise ValueError('Invalid syntax')
@@ -17,49 +42,31 @@ def parse_func_str(val, auto_quote=True):
     if not fn or function_wrong_symbols.search(fn):
         raise ValueError('Invalid symbols in function name')
     # try parsing params with ast
+    args = 'f({})'.format(params)
     try:
-        args = 'f({})'.format(params)
         tree = ast.parse(args)
-        funccall = tree.body[0].value
-
-        args = [ast.literal_eval(arg) for arg in funccall.args]
-        kwargs = {
-            arg.arg: ast.literal_eval(arg.value) for arg in funccall.keywords
-        }
-    # try parsing and auto quoting
-    except (ValueError, SyntaxError) as e:
-        if not auto_quote:
-            raise ValueError(e)
-        params = [v for v in val.split('(', 1)[1].rsplit(')', 1)[0].split(',')]
-        new_params = []
-        if auto_quote:
-            for p in params:
-                new_p = p.split('=') if p.__contains__('=') else [None, p]
-                new_p1 = new_p[1].strip()
-                if params_wrong_symbols.match(new_p[1].strip()):
-                    raise ValueError(
-                        'Invalid symbols in args - {}'.format(new_p1))
-                if new_p1 and not string_match.match(new_p1):
-                    try:
-                        float(new_p1)
-                    except ValueError:
-                        p = '"{}"'.format(new_p[1].strip(
-                        )) if new_p[0] is None else '{}="{}"'.format(
-                            new_p[0], new_p1)
-                new_params.append(p)
-        else:
-            new_params = params
-        code = dedent("""
-        def {}(*args, **kwargs):
-            global a, kw
-            a = args
-            kw = kwargs
-        {}""").format(fn, '{}({})'.format(fn, ', '.join(new_params)))
-        d = {}
+    except:
+        raise ValueError('Invalid syntax')
+    funccall = tree.body[0].value
+    args = []
+    for arg in funccall.args:
         try:
-            exec(code, d)
-            args = d['a']
-            kwargs = d['kw']
-        except Exception as e:
-            raise ValueError(str(e))
-    return fn, tuple(args), kwargs
+            args.append(ast.literal_eval(arg))
+        except:
+            if auto_quote:
+                args.append(_format_arg(arg))
+            else:
+                _invalid_arg(arg)
+    kwargs = {}
+    for arg in funccall.keywords:
+        try:
+            kwargs[arg.arg] = ast.literal_eval(arg.value)
+        except:
+            if auto_quote:
+                try:
+                    kwargs[arg.arg] = _format_arg(arg)
+                except:
+                    _invalid_arg(arg)
+            else:
+                _invalid_arg(arg)
+    return fn, args, kwargs

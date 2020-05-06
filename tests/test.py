@@ -469,35 +469,35 @@ def test_parse_func_str():
     }, {
         'raw': 'myfunc(1,2,3)',
         'fname': 'myfunc',
-        'args': (1, 2, 3)
+        'args': [1, 2, 3]
     }, {
         'raw': 'myfunc("test")',
         'fname': 'myfunc',
-        'args': ('test',)
+        'args': ['test']
     }, {
         'raw': '@myfunc("test")',
         'fname': '@myfunc',
-        'args': ('test',)
+        'args': ['test']
     }, {
         'raw': 'myfunc(\'tes"t\')',
         'fname': 'myfunc',
-        'args': ('tes"t',)
+        'args': ['tes"t']
     }, {
         'raw': 'myfunc(\'test\')',
         'fname': 'myfunc',
-        'args': ('test',)
+        'args': ['test']
     }, {
         'raw': 'myfunc("test", 123.45)',
         'fname': 'myfunc',
-        'args': ('test', 123.45)
+        'args': ['test', 123.45]
     }, {
         'raw': 'myfunc(123.45, \'test\')',
         'fname': 'myfunc',
-        'args': (123.45, 'test')
+        'args': [123.45, 'test']
     }, {
         'raw': 'myfunc("test", 123,value=123,name="xxx")',
         'fname': 'myfunc',
-        'args': ('test', 123),
+        'args': ['test', 123],
         'kwargs': {
             'name': 'xxx',
             'value': 123
@@ -505,7 +505,7 @@ def test_parse_func_str():
     }, {
         'raw': 'myfunc(\'test\', 123,value=123,name=\'xxx\')  ',
         'fname': 'myfunc',
-        'args': ('test', 123),
+        'args': ['test', 123],
         'kwargs': {
             'name': 'xxx',
             'value': 123
@@ -513,7 +513,7 @@ def test_parse_func_str():
     }, {
         'raw': 'myfunc(\'test\', 123,value=123,name="xxx")',
         'fname': 'myfunc',
-        'args': ('test', 123),
+        'args': ['test', 123],
         'kwargs': {
             'name': 'xxx',
             'value': 123
@@ -521,7 +521,7 @@ def test_parse_func_str():
     }, {
         'raw': 'myfunc(test, 123,value=123, name=xxx)',
         'fname': 'myfunc',
-        'args': ('test', 123),
+        'args': ['test', 123],
         'kwargs': {
             'name': 'xxx',
             'value': 123
@@ -530,7 +530,7 @@ def test_parse_func_str():
     }, {
         'raw': 'my_func("test", 123,value=123,name=\'x"xx\')',
         'fname': 'my_func',
-        'args': ('test', 123),
+        'args': ['test', 123],
         'kwargs': {
             'name': 'x"xx',
             'value': 123
@@ -538,7 +538,7 @@ def test_parse_func_str():
     }, {
         'raw': 'myfunc("test", 123,value=123.45,name="xxx")',
         'fname': 'myfunc',
-        'args': ('test', 123),
+        'args': ['test', 123],
         'kwargs': {
             'name': 'xxx',
             'value': 123.45
@@ -578,9 +578,9 @@ def test_parse_func_str():
             fname, args, kwargs = pyaltt2.lp.parse_func_str(
                 t['raw'], auto_quote=t.get('auto_quote'))
             assert t['fname'] == fname
-            assert len(t.get('args', ())) == len(args)
+            assert len(t.get('args', [])) == len(args)
             assert len(t.get('kwargs', {})) == len(kwargs)
-            assert t.get('args', ()) == args
+            assert t.get('args', []) == args
             for k, v in t.get('kwargs', {}).items():
                 assert kwargs[k] == v
 
