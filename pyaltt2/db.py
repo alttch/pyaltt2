@@ -24,6 +24,8 @@ def format_condition(f, kw=None, fields=None, cond=None):
     """
     if kw is None:
         kw = {}
+    else:
+        kw = kw.copy()
     if fields is None:
         import re
         fmatch = re.compile('^[A-Za-z0-9\._-]*$')
