@@ -11,6 +11,48 @@ import pyaltt2.json as json
 from functools import partial
 
 
+def format_condition(f, kw=None, fields=None, cond=None):
+    """
+    Args:
+        f: condition filter (dict name/value)
+        kw: kwargs query dict
+        fields: allowed fields
+        cond: initial condition
+    Returns:
+        tuple cond (string), kw (dict). String can be safely used in SQL query,
+        dict should be set as query kwargs
+    """
+    if kw is None:
+        kw = {}
+    if fields is None:
+        import re
+        fmatch = re.compile('^[A-Za-z0-9\._-]*$')
+    if cond is None:
+        cond = ''
+    for k, v in f.items():
+        if (fields is None and
+                not re.match(fmatch, k)) or (fields is not None and
+                                             k not in fields):
+            raise ValueError(k)
+        eqs = ' is ' if v in (None, True, False) else '='
+        if v is None:
+            val = 'null'
+        elif v is True:
+            val = 'true'
+        elif v is False:
+            val = 'false'
+        else:
+            key = k.replace('.', '__').replace('-', '__')
+            val = f':{key}'
+            kw[key] = v
+        if cond == '':
+            cond = 'where '
+        else:
+            cond += ' and '
+        cond += f'{k}{eqs}{val}'
+    return cond, kw
+
+
 class Database:
     """
     Database wrapper for SQLAlchemy
@@ -26,7 +68,8 @@ class Database:
             rq_func: resource loader function (for query method)
             kwargs: additional engine options (ignored for SQLite)
         """
-        if not dbconn: return
+        if not dbconn:
+            return
         import sqlalchemy as sa
 
         class _ForeignKeysListener(sa.interfaces.PoolListener):
@@ -266,7 +309,8 @@ class KVStorage:
         result = self.db.query('kv.get', qargs=[self.table_name],
                                id=key).fetchone()
         if result:
-            if delete: self.delete(key)
+            if delete:
+                self.delete(key)
             return loads(result.content, raw=False)
         else:
             raise LookupError

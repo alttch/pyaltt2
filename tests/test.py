@@ -24,6 +24,49 @@ from types import SimpleNamespace
 from functools import partial
 
 
+def test_cond():
+    cond, kw = pyaltt2.db.format_condition({'a': 2, 'b': True, 'c': '99'})
+    assert cond == 'where a=:a and b is true and c=:c'
+    assert kw == {'a': 2, 'c': '99'}
+    cond, kw = pyaltt2.db.format_condition({
+        'a': 2,
+        'b': True,
+        'c': '99'
+    },
+                                           fields=['a', 'b', 'c'])
+    assert cond == 'where a=:a and b is true and c=:c'
+    assert kw == {'a': 2, 'c': '99'}
+    cond, kw = pyaltt2.db.format_condition({
+        'a': 2,
+        'b': None,
+        'c': '99'
+    },
+                                           fields=['a', 'b', 'c'],
+                                           cond='where z is null')
+    assert cond == 'where z is null and a=:a and b is null and c=:c'
+    assert kw == {'a': 2, 'c': '99'}
+    with pytest.raises(ValueError):
+        cond, kw = pyaltt2.db.format_condition({
+            'a': 2,
+            'b': True,
+            'c': '99'
+        },
+                                               fields=['a', 'b'])
+    with pytest.raises(ValueError):
+        cond, kw = pyaltt2.db.format_condition({'a;y': 2, 'b': True, 'c': '99'})
+    cond, kw = pyaltt2.db.format_condition({'a.x': 2, 'b': True, 'c': '99'})
+    assert cond == 'where a.x=:a__x and b is true and c=:c'
+    assert kw == {'a__x': 2, 'c': '99'}
+    cond, kw = pyaltt2.db.format_condition({
+        'a': 2,
+        'b': True,
+        'c': '99'
+    },
+                                           fields=['a', 'b', 'c'])
+    assert cond == 'where a=:a and b is true and c=:c'
+    assert kw == {'a': 2, 'c': '99'}
+
+
 def test_db():
     try:
         try:
