@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import logging
 import time
-from atasker import task_supervisor
+from neotasker import task_supervisor
 
 task_supervisor.start()
 task_supervisor.create_aloop('cleaners')
