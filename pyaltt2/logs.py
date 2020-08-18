@@ -119,8 +119,10 @@ def get(level=0, t=0, n=None):
         n: max number of log records (default: 100)
     """
     lr = []
-    if n is None: n = DEFAULT_LOG_GET
-    if n > MAX_LOG_GET: n = MAX_LOG_GET
+    if n is None:
+        n = DEFAULT_LOG_GET
+    if n > MAX_LOG_GET:
+        n = MAX_LOG_GET
     t = time.time() - t if t else 0
     ll = 0 if level is None else level
     with _log_record_lock:
@@ -168,8 +170,8 @@ class StdoutHandler(logging.StreamHandler):
 
     def format(self, record):
         r = super().format(record)
-        return neotermcolor.colored(r, style='logger:{}'.format(
-            record.levelno)) if config.colorize else r
+        return neotermcolor.colored(
+            r, style='logger:' + str(record.levelno)) if config.colorize else r
 
 
 class DummyHandler(logging.StreamHandler):
