@@ -36,7 +36,16 @@ _log_records = []
 _exception_log_lock = threading.RLock()
 _log_record_lock = threading.RLock()
 
-logger = logging.getLogger('pyaltt2:logs')
+logger = logging.getLogger('pyaltt2.logs')
+
+try:
+    import pytz
+    LOCAL_TZ = pytz.timezone(time.tzname[0])
+except:
+    logger.warning(
+        'Unable to determine local time zone, is pytz module installed?')
+    LOCAL_TZ = None
+
 
 config = SimpleNamespace(
         name='',
@@ -94,6 +103,9 @@ def append(record=None, rd=None, **kwargs):
         return
     if r['msg'] and (not config.ignore or r['msg'][0] != config.ignore) and \
             r['mod'] not in config.ignore_mods:
+        if LOCAL_TZ:
+            r['dt'] = datetime.datetime.fromtimestamp(
+                r['t']).replace(tzinfo=LOCAL_TZ).isoformat()
         with _log_record_lock:
             _log_records.append(r)
         handle_append(r, **kwargs)
