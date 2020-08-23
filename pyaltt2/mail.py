@@ -13,7 +13,8 @@ class SMTP:
                  tls=False,
                  ssl=False,
                  login=None,
-                 password=None):
+                 password=None,
+                 debug=False):
         """
         Args:
             host: SMTP host
@@ -30,6 +31,7 @@ class SMTP:
         self.login = login
         self.password = password
         self.sendfunc = smtplib.SMTP_SSL if ssl else smtplib.SMTP
+        self.debug = debug
 
     def send(self, sender, rcpt, body):
         """
@@ -41,6 +43,8 @@ class SMTP:
             body: E-Mail body (string)
         """
         sm = self.sendfunc(self.host, self.port)
+        if self.debug:
+            sm.set_debuglevel(9)
         sm.ehlo()
         if self.tls:
             sm.starttls()
