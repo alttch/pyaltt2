@@ -1,3 +1,11 @@
+# dirty fix for cryptography.Random
+import time
+try:
+    getattr(time, 'clock')
+except AttributeError:
+    time.clock = time.time
+
+
 def gen_random_str(length=32):
     """
     Generate random string (letters+numbers)
@@ -31,7 +39,8 @@ def encrypt(raw, key, hmac_key=None, key_is_hash=False, b64=True, bits=256):
     from Crypto import Random
     import hashlib
     import hmac
-    if isinstance(raw, str): raw = raw.encode()
+    if isinstance(raw, str):
+        raw = raw.encode()
     if hmac_key is True:
         h = key if key_is_hash else hashlib.sha512(
             key.encode() if isinstance(key, str) else key).digest()
