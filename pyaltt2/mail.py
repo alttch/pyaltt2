@@ -76,5 +76,5 @@ class SMTP:
             m = MIMEText(text)
         m['Subject'] = subject
         m['From'] = sender
-        m['To'] = rcpt
+        m['To'] = rcpt[0] if isinstance(rcpt, list) and len(rcpt) > 1 else rcpt
         self.send(sender, rcpt, m.as_string())
