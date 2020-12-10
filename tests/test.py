@@ -356,6 +356,25 @@ def test_crypto_rioja():
         pass
 
 
+def test_crypto_signature():
+    content = 'test'
+    content2 = 'test2'
+    with open('./keys/private.pem', 'rb') as fh:
+        pkey = fh.read()
+    with open('./keys/public.pem', 'rb') as fh:
+        pubkey = fh.read()
+    signature = pyaltt2.crypto.sign(content, pkey)
+    pyaltt2.crypto.verify_signature(content, signature, pubkey)
+    with pytest.raises(Exception):
+        pyaltt2.crypto.verify_signature(content2, signature, pubkey)
+    with pytest.raises(Exception):
+        pyaltt2.crypto.verify_signature(content2, signature)
+    pyaltt2.crypto.default_public_key = pubkey
+    pyaltt2.crypto.verify_signature(content, signature)
+    with pytest.raises(Exception):
+        pyaltt2.crypto.verify_signature(content2, signature)
+
+
 def test_locker():
     mylock = pyaltt2.locker.Locker(mod='test', timeout=0.1, relative=False)
     result = SimpleNamespace(critical_called=False)
@@ -463,8 +482,10 @@ def test_safe_int():
     assert pyaltt2.converters.safe_int(20) == 20
     assert pyaltt2.converters.safe_int('20') == 20
     assert pyaltt2.converters.safe_int('0xFF') == 255
+    assert pyaltt2.converters.safe_int('0b11101') == 29
     with pytest.raises(ValueError):
         assert pyaltt2.converters.safe_int('0xFZ')
+        assert pyaltt2.converters.safe_int('0b12345')
 
 
 def test_parse_date():

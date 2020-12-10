@@ -76,10 +76,14 @@ def safe_int(val):
     """
     if isinstance(val, int):
         return val
-    elif isinstance(val, str) and val.find('x') != -1:
-        return int(val, 16)
-    else:
-        return int(val)
+    elif isinstance(val, str):
+        if 'x' in val:
+            return int(val, 16)
+        elif 'b' in val:
+            return int(val, 2)
+        elif 'o' in val:
+            return int(val, 8)
+    return int(val)
 
 
 def parse_date(val=None, return_timestamp=True, ms=False):

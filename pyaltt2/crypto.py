@@ -5,7 +5,6 @@ try:
 except AttributeError:
     time.clock = time.time
 
-
 def gen_random_str(length=32):
     """
     Generate random string (letters+numbers)
@@ -152,3 +151,80 @@ class Rioja:
                        key_is_hash=True,
                        b64=b64,
                        bits=self.__bits)
+
+default_public_key = None
+"""
+default per-project public key for signature verification
+"""
+
+def sign(content, private_key, key_password=None):
+    """
+    Sign content with RSA key
+    Args:
+        content: content to sign
+        private_key: private RSA (PEM) key
+        key_password: key password (optional)
+    Returns:
+        base64-encoded RSA signature
+    """
+    from cryptography.hazmat.primitives import serialization, hashes
+    from cryptography.hazmat.primitives.asymmetric import padding
+    from cryptography.hazmat.backends import default_backend
+    import hashlib
+    import base64
+
+    if not isinstance(content, bytes):
+        content = str(content).encode()
+    if not isinstance(private_key, bytes):
+        private_key = str(private_key).encode()
+
+    privkey = serialization.load_pem_private_key(private_key,
+                                                 password=key_password,
+                                                 backend=default_backend())
+
+    prehashed = hashlib.sha256(content).digest()
+
+    sig = privkey.sign(
+        prehashed,
+        padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH), hashes.SHA256())
+
+    return base64.b64encode(sig).decode()
+
+
+def verify_signature(content, signature, public_key=None):
+    """
+    Verify content with RSA signature
+
+    If public key is not specified, global per-project key is used
+
+    Args:
+        content: content to sign
+        signature: base64-encoded RSA signature
+        public_key: public RSA (PEM) key
+    Returns:
+        base64-encoded RSA signature
+    """
+    import hashlib
+    import base64
+    from cryptography.exceptions import InvalidSignature
+    from cryptography.hazmat.primitives import serialization, hashes
+    from cryptography.hazmat.primitives.asymmetric import padding
+    from cryptography.hazmat.backends import default_backend
+
+    if not isinstance(content, bytes):
+        content = str(content).encode()
+    if public_key is None:
+        public_key = default_public_key
+    elif not isinstance(public_key, bytes):
+        public_key = str(public_key).encode()
+
+    pubkey = serialization.load_pem_public_key(public_key,
+                                               backend=default_backend())
+    prehashed_msg = hashlib.sha256(content).digest()
+    decoded_sig = base64.b64decode(signature)
+    pubkey.verify(
+        decoded_sig, prehashed_msg,
+        padding.PSS(mgf=padding.MGF1(hashes.SHA256()),
+                    salt_length=padding.PSS.MAX_LENGTH), hashes.SHA256())
+    return True
