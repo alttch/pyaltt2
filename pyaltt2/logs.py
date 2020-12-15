@@ -19,10 +19,16 @@ import neotermcolor
 import threading
 import time
 import datetime
+import types
 
 from .network import parse_host_port
 
 from types import SimpleNamespace
+
+try:
+    import rapidjson as json
+except:
+    import json
 
 DEFAULT_LOG_GET = 100
 MAX_LOG_GET = 10000
@@ -64,7 +70,9 @@ config = SimpleNamespace(
         formatter = logging.Formatter('%(asctime)s ' + platform.node() + \
             ' %(levelname)s f:%(filename)s mod:%(module)s fn:%(funcName)s ' + \
             'l:%(lineno)d th:%(threadName)s :: %(message)s'),
-        syslog_formatter = None
+        syslog_formatter = None,
+        log_json=False,
+        syslog_json=False
         )
 
 __data = SimpleNamespace(logger=None, cleaner=None)
@@ -76,6 +84,58 @@ neotermcolor.set_style('logger:40', color='red')
 neotermcolor.set_style('logger:50', color='red', attrs='bold')
 
 neotermcolor.set_style('logger:exception', color='red')
+
+
+def _getJSONMessage(self):
+    msg = str(self.msg)
+    if self.args:
+        msg = msg % self.args
+    return json.dumps(msg)[1:-1]
+
+
+class JSysLogHandler(logging.handlers.SysLogHandler):
+
+    def __init__(self, *args, as_json=False, **kwargs):
+        self.as_json = as_json
+        super().__init__(*args, **kwargs)
+
+    def emit(self, record):
+        if self.as_json:
+            record.getMessage = types.MethodType(_getJSONMessage, record)
+        super().emit(record)
+
+
+class JWatchedFileHandler(logging.handlers.WatchedFileHandler):
+
+    def __init__(self, *args, as_json=False, **kwargs):
+        self.as_json = as_json
+        super().__init__(*args, **kwargs)
+
+    def emit(self, record):
+        if self.as_json:
+            record.getMessage = types.MethodType(_getJSONMessage, record)
+        super().emit(record)
+
+
+class StdoutHandler(logging.StreamHandler):
+
+    def __init__(self, as_json=False):
+        self.as_json = as_json
+        super().__init__()
+
+    def emit(self, record):
+        if not config.stdout_ignore or \
+                ((config.ignore is None or \
+                    not record.getMessage().startswith(config.ignore)) and \
+                    record.module not in config.ignore_mods):
+            if self.as_json:
+                record.getMessage = types.MethodType(_getJSONMessage, record)
+            super().emit(record)
+
+    def format(self, record):
+        r = super().format(record)
+        return neotermcolor.colored(
+            r, style='logger:' + str(record.levelno)) if config.colorize else r
 
 
 def append(record=None, rd=None, **kwargs):
@@ -171,21 +231,6 @@ class MemoryLogHandler(logging.Handler):
         append(record)
 
 
-class StdoutHandler(logging.StreamHandler):
-
-    def emit(self, record):
-        if not config.stdout_ignore or \
-                ((config.ignore is None or \
-                    not record.getMessage().startswith(config.ignore)) and \
-                    record.module not in config.ignore_mods):
-            super().emit(record)
-
-    def format(self, record):
-        r = super().format(record)
-        return neotermcolor.colored(
-            r, style='logger:' + str(record.levelno)) if config.colorize else r
-
-
 class DummyHandler(logging.StreamHandler):
 
     def emit(self, record):
@@ -266,6 +311,8 @@ def init(**kwargs):
         colorize: colorize stdout if possible
         formatter: log formatter
         syslog_formatter: if defined, use custom formatter for syslog
+        log_json: true/false
+        syslog_json: true/false
     """
     for k, v in kwargs.items():
         if not hasattr(config, k):
@@ -280,7 +327,7 @@ def init(**kwargs):
     has_handler = False
     if config.log_file:
         has_handler = True
-        handler = logging.handlers.WatchedFileHandler(config.log_file)
+        handler = JWatchedFileHandler(config.log_file, as_json=config.log_json)
         handler.setFormatter(config.formatter)
         __data.logger.addHandler(handler)
     if config.keep_logmem:
@@ -301,14 +348,15 @@ def init(**kwargs):
                     config.syslog))
                 syslog_addr = None
         if syslog_addr:
-            handler = logging.handlers.SysLogHandler(address=syslog_addr)
+            handler = JSysLogHandler(address=syslog_addr,
+                                     as_json=config.syslog_json)
             handler.setFormatter(config.syslog_formatter if config.
                                  syslog_formatter else config.formatter)
             __data.logger.addHandler(handler)
     if (not has_handler and config.log_stdout == 2) or \
             config.log_stdout is True or config.log_stdout == 1:
         has_handler = True
-        handler = StdoutHandler()
+        handler = StdoutHandler(as_json=config.log_json)
         handler.setFormatter(config.formatter)
         __data.logger.addHandler(handler)
     if not has_handler:
