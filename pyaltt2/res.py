@@ -1,4 +1,4 @@
-import importlib
+import importlib.util
 from functools import lru_cache
 from types import SimpleNamespace
 from pathlib import Path
