@@ -18,10 +18,10 @@ def load_yaml(fname, schema=None):
         fname: file name to load
         schema: JSON schema for validation
     """
-    import jsonschema
     with open(fname) as fh:
         data = yaml.load(fh.read())
     if schema:
+        import jsonschema
         jsonschema.validate(data, schema=schema)
     return data
 
