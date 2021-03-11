@@ -63,6 +63,7 @@ config = SimpleNamespace(
         tracebacks=False,
         ignore=None,
         ignore_mods = [],
+        omit_ignore_for_level=logging.WARNING,
         stdout_ignore=True,
         keep_logmem=0,
         keep_exceptions=0,
@@ -161,8 +162,9 @@ def append(record=None, rd=None, **kwargs):
         r = rd
     else:
         return
-    if r['msg'] and (not config.ignore or r['msg'][0] != config.ignore) and \
-            r['mod'] not in config.ignore_mods:
+    if r['msg'] and (record.levelno >= config.omit_ignore_for_level or
+                     (not config.ignore or r['msg'][0] != config.ignore) and
+                     r['mod'] not in config.ignore_mods):
         if LOCAL_TZ:
             r['dt'] = datetime.datetime.fromtimestamp(
                 r['t']).replace(tzinfo=LOCAL_TZ).isoformat()
@@ -305,6 +307,7 @@ def init(**kwargs):
         tracebacks: log tracebacks (default: False)
         ignore: use "ignore" symbol - memory hdlr ignores records starting with
         ignore_mods: list of modules to ignore
+        omit_ignore_for_level: omit ignore props for >= level
         stdout_ignore: use "ignore" symbol in stdout logger as well
         keep_logmem: keep log records in memory for the specified time (seconds)
         keep_exceptions: keep number of recent exceptions
