@@ -162,7 +162,7 @@ def append(record=None, rd=None, **kwargs):
         r = rd
     else:
         return
-    if r['msg'] and (record.levelno >= config.omit_ignore_for_level or
+    if r['msg'] and (r['l'] >= config.omit_ignore_for_level or
                      (not config.ignore or r['msg'][0] != config.ignore) and
                      r['mod'] not in config.ignore_mods):
         if LOCAL_TZ:
