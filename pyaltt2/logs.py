@@ -239,7 +239,11 @@ class DummyHandler(logging.StreamHandler):
         pass
 
 
-def log_traceback(display=False, use_ignore=False, force=False, e=None):
+def log_traceback(display=False,
+                  use_ignore=False,
+                  force=False,
+                  e=None,
+                  critical=False):
     """
     Log exception traceback
 
@@ -258,14 +262,18 @@ def log_traceback(display=False, use_ignore=False, force=False, e=None):
         e_msg = str(e)
     if (config.tracebacks or force) and not display:
         pfx = config.ignore if use_ignore and config.ignore else ''
-        logging.error(pfx + e_msg)
+        if critical:
+            logging.critical(pfx + e_msg)
+        else:
+            logging.error(pfx + e_msg)
     elif display:
         print(neotermcolor.colored(e_msg, style='logger:exception'))
     if config.keep_exceptions:
         with _exception_log_lock:
             e = {
                 't': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f'),
-                'e': e_msg
+                'e': e_msg,
+                'l': 'CRITICAL' if critical else 'ERROR'
             }
             _exceptions.append(e)
             if len(_exceptions) > config.keep_exceptions:
