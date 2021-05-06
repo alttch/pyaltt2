@@ -269,9 +269,12 @@ def log_traceback(display=False,
     elif display:
         print(neotermcolor.colored(e_msg, style='logger:exception'))
     if config.keep_exceptions:
+        t = datetime.datetime.now()
+        if LOCAL_TZ:
+            t = t.replace(tzinfo=LOCAL_TZ)
         with _exception_log_lock:
             e = {
-                't': datetime.datetime.now().isoformat(),
+                't': t.isoformat(),
                 'e': e_msg,
                 'l': 'CRITICAL' if critical else 'ERROR'
             }
