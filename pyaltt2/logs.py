@@ -271,7 +271,7 @@ def log_traceback(display=False,
     if config.keep_exceptions:
         with _exception_log_lock:
             e = {
-                't': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S,%f'),
+                't': datetime.datetime.now().isoformat(),
                 'e': e_msg,
                 'l': 'CRITICAL' if critical else 'ERROR'
             }
