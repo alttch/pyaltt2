@@ -334,6 +334,7 @@ def init(**kwargs):
         setattr(config, k, v)
 
     logging.basicConfig(level=config.level)
+    logging.getLogger().setLevel(level=config.level)
 
     __data.logger = logging.getLogger()
     for h in __data.logger.handlers:
