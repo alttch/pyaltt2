@@ -26,6 +26,18 @@ def load_yaml(fname, schema=None):
     return data
 
 
+class Config:
+
+    def __init__(self, cfg, read_file='r'):
+        self._cfg = cfg
+
+    def get_value(self, env=None, path=None, **kwargs):
+        return config_value(env, self._cfg, path, **kwargs)
+
+    def get(self, path, **kwargs):
+        return config_value(config=self._cfg, config_path=path, **kwargs)
+
+
 def config_value(env=None,
                  config=None,
                  config_path=None,
@@ -40,7 +52,7 @@ def config_value(env=None,
         env: search in system env, if specified, has top priority
         config: config dict to process
         config_path: config path (e.g. /some/long/key)
-        to_str: strinify value before returning
+        to_str: stringify value before returning
         read_file: if value starts with '/', read it from file with mode
             (default: 'r')
         in_place: replace value in config dict

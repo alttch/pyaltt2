@@ -266,6 +266,23 @@ def test_config_value():
     assert config['somedata']['somekey2'] == '1'
 
 
+def test_config():
+    cfg = pyaltt2.config.Config({
+        'a': 2,
+        'b': {
+            'c': '123'
+        },
+        'd': {
+            'x': {
+                'y': 'aaa'
+            }
+        }
+    })
+    for path, value in [('a', 2), ('b/c', '123'), ('d/x/y', 'aaa')]:
+        assert cfg.get_value(path=path) == value
+        assert cfg.get(path) == value
+
+
 def test_crypto_gen_random_str():
 
     s1 = pyaltt2.crypto.gen_random_str()
