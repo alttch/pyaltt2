@@ -34,8 +34,11 @@ class Config:
     def get_value(self, env=None, path=None, **kwargs):
         return config_value(env, self._cfg, path, **kwargs)
 
-    def get(self, path, **kwargs):
-        return config_value(config=self._cfg, config_path=path, **kwargs)
+    def get(self, path, default=LookupError, **kwargs):
+        return config_value(config=self._cfg,
+                            config_path=path,
+                            default=default,
+                            **kwargs)
 
 
 def config_value(env=None,

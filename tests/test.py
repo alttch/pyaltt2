@@ -281,6 +281,9 @@ def test_config():
     for path, value in [('a', 2), ('b/c', '123'), ('d/x/y', 'aaa')]:
         assert cfg.get_value(path=path) == value
         assert cfg.get(path) == value
+    with pytest.raises(LookupError):
+        assert cfg.get('xxx')
+    assert cfg.get('xxx', 123) == 123
 
 
 def test_crypto_gen_random_str():
