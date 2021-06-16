@@ -183,7 +183,7 @@ def handle_append(rd, **kwargs):
     """
 
 
-def get(level=0, t=0, n=None):
+def get(level=0, t=0, n=None, pattern=None):
     """
     Get recent log records
 
@@ -201,8 +201,14 @@ def get(level=0, t=0, n=None):
     ll = 0 if level is None else level
     with _log_record_lock:
         recs = reversed(_log_records)
+    if pattern:
+        import re
+        rgx = re.compile(f'.*{pattern}.*', re.IGNORECASE)
+    else:
+        rgx = None
     for r in recs:
-        if r['t'] > t and r['l'] >= ll:
+        if r['t'] > t and r['l'] >= ll and (rgx is None or
+                                            re.match(rgx, r['msg'])):
             lr.append(r)
             if len(lr) >= n:
                 break
