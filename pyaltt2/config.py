@@ -30,6 +30,7 @@ class Config:
 
     def __init__(self, cfg, read_file='r'):
         self._cfg = cfg
+        self.read_file = read_file
 
     def get_value(self, env=None, path=None, **kwargs):
         return config_value(env, self._cfg, path, **kwargs)
@@ -38,6 +39,7 @@ class Config:
         return config_value(config=self._cfg,
                             config_path=path,
                             default=default,
+                            read_file=self.read_file,
                             **kwargs)
 
 
