@@ -20,6 +20,7 @@ import threading
 import time
 import datetime
 import types
+import sys
 
 from .network import parse_host_port
 
@@ -260,20 +261,32 @@ def log_traceback(display=False,
         e: exception or exc_info to log (optional)
     """
     import traceback
+    msg = None
+    cn = None
     if e is None:
-        e_msg = traceback.format_exc()
+        trace = traceback.format_exc()
+        e = sys.exc_info()[1]
+        if e:
+            cn = e.__class__.__name__
+            msg = str(e)
     elif isinstance(e, tuple):
-        e_msg = ''.join(traceback.format_exception(*e))
+        trace = ''.join(traceback.format_exception(*e))
+        cn = e[1].__class__.__name__
+        msg = str(e[1])
     else:
-        e_msg = str(e)
+        trace = traceback.format_exc()
+        msg = str(e)
+        cn = e.__class__.__name__
     if (config.tracebacks or force) and not display:
         pfx = config.ignore if use_ignore and config.ignore else ''
         if critical:
-            logging.critical(pfx + e_msg)
+            logging.critical(pfx + trace if trace else msg)
         else:
-            logging.error(pfx + e_msg)
+            logging.error(pfx + trace if trace else msg)
     elif display:
-        print(neotermcolor.colored(e_msg, style='logger:exception'))
+        print(
+            neotermcolor.colored(trace if trace else msg,
+                                 style='logger:exception'))
     if config.keep_exceptions:
         t = datetime.datetime.now()
         if LOCAL_TZ:
@@ -281,7 +294,11 @@ def log_traceback(display=False,
         with _exception_log_lock:
             e = {
                 't': t.isoformat(),
-                'e': e_msg,
+                'e': {
+                    'class': cn,
+                    'msg': msg,
+                    'trace': trace
+                },
                 'l': 'CRITICAL' if critical else 'ERROR'
             }
             _exceptions.append(e)
