@@ -327,6 +327,11 @@ def serialize():
         return {'exceptions': _exceptions.copy()}
 
 
+def serialize_exceptions():
+    with _exception_log_lock:
+        return _exceptions.copy()
+
+
 def init(**kwargs):
     """
     Initialize logger
