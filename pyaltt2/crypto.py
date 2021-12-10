@@ -34,8 +34,8 @@ def encrypt(raw, key, hmac_key=None, key_is_hash=False, b64=True, bits=256):
 
     note: if hmac_key is True and key is hash, sha512 sum is required
     """
-    from Crypto.Cipher import AES
-    from Crypto import Random
+    from Cryptodome.Cipher import AES
+    from Cryptodome import Random
     import hashlib
     import hmac
     if isinstance(raw, str):
@@ -80,7 +80,7 @@ def decrypt(enc, key, hmac_key=None, key_is_hash=False, b64=True, bits=256):
 
     note: if hmac_key is True and key is hash, sha512 sum is required
     """
-    from Crypto.Cipher import AES
+    from Cryptodome.Cipher import AES
     import hashlib
     import hmac
     if b64:
