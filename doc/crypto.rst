@@ -1,7 +1,7 @@
 Cryptography helper functions
 =============================
 
-Requires **pycrypto**
+Requires **pycryptodomex**
 
 .. automodule:: pyaltt2.crypto
    :members:
