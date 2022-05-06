@@ -4,11 +4,6 @@ Extra mods required: pyyaml, jsonschema
 import yaml
 import os
 
-try:
-    yaml.warnings({'YAMLLoadWarning': False})
-except:
-    pass
-
 
 def load_yaml(fname, schema=None):
     """
@@ -19,7 +14,7 @@ def load_yaml(fname, schema=None):
         schema: JSON schema for validation
     """
     with open(fname) as fh:
-        data = yaml.load(fh.read())
+        data = yaml.safe_load(fh.read())
     if schema:
         import jsonschema
         jsonschema.validate(data, schema=schema)
