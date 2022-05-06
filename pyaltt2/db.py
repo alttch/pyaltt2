@@ -28,7 +28,7 @@ def format_condition(f, kw=None, fields=None, cond=None):
         kw = kw.copy()
     if fields is None:
         import re
-        fmatch = re.compile('^[A-Za-z0-9\._-]*$')
+        fmatch = re.compile('^[A-Za-z0-9._-]*$')
     if cond is None:
         cond = ''
     for k, v in f.items():
@@ -74,22 +74,14 @@ class Database:
             return
         import sqlalchemy as sa
 
-        class _ForeignKeysListener(sa.interfaces.PoolListener):
-
-            def connect(self, dbapi_con, con_record):
-                try:
-                    dbapi_con.execute('pragma foreign_keys=ON')
-                except:
-                    pass
-
         self.db_lock = threading.RLock()
         self.g = threading.local()
         self.rq_func = rq_func
         if dbconn.find('://') == -1:
             dbconn = 'sqlite:///' + os.path.expanduser(dbconn)
         if dbconn.startswith('sqlite:///'):
-            self.db = sa.create_engine(dbconn,
-                                       listeners=[_ForeignKeysListener()])
+            self.db = sa.create_engine(dbconn)
+            self.db.execute('pragma foregn_keys=ON')
         else:
             self.db = sa.create_engine(dbconn, **kwargs)
         self._setup()
